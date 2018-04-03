@@ -109,6 +109,7 @@ func (s *InterfacesTestSuite) SetupTest() {
 }
 
 func TestInterfacesTestSuite(t *testing.T) {
+	t.Parallel()
 	suite.Run(t, new(InterfacesTestSuite))
 }
 

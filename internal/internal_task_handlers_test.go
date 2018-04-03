@@ -73,6 +73,7 @@ func (t *TaskHandlersTestSuite) SetupSuite() {
 }
 
 func TestTaskHandlersTestSuite(t *testing.T) {
+	t.Parallel()
 	suite.Run(t, new(TaskHandlersTestSuite))
 }
 

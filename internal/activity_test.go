@@ -40,6 +40,7 @@ import (
 var callOptions = []interface{}{gomock.Any(), gomock.Any(), gomock.Any()}
 
 func TestActivityHeartbeat(t *testing.T) {
+	t.Parallel()
 	mockCtrl := gomock.NewController(t)
 	service := workflowservicetest.NewMockClient(mockCtrl)
 
@@ -54,6 +55,7 @@ func TestActivityHeartbeat(t *testing.T) {
 }
 
 func TestActivityHeartbeat_InternalError(t *testing.T) {
+	t.Parallel()
 	p := backoff.NewExponentialRetryPolicy(time.Millisecond)
 	p.SetMaximumInterval(100 * time.Millisecond)
 	p.SetExpirationInterval(100 * time.Millisecond)
@@ -77,6 +79,7 @@ func TestActivityHeartbeat_InternalError(t *testing.T) {
 }
 
 func TestActivityHeartbeat_CancelRequested(t *testing.T) {
+	t.Parallel()
 	mockCtrl := gomock.NewController(t)
 	service := workflowservicetest.NewMockClient(mockCtrl)
 
@@ -95,6 +98,7 @@ func TestActivityHeartbeat_CancelRequested(t *testing.T) {
 }
 
 func TestActivityHeartbeat_EntityNotExist(t *testing.T) {
+	t.Parallel()
 	mockCtrl := gomock.NewController(t)
 	service := workflowservicetest.NewMockClient(mockCtrl)
 
@@ -113,6 +117,7 @@ func TestActivityHeartbeat_EntityNotExist(t *testing.T) {
 }
 
 func TestActivityHeartbeat_SuppressContinousInvokes(t *testing.T) {
+	t.Parallel()
 	mockCtrl := gomock.NewController(t)
 	service := workflowservicetest.NewMockClient(mockCtrl)
 

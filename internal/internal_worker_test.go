@@ -94,6 +94,7 @@ func testActivity(ctx context.Context) error {
 }
 
 func TestDecisionTaskHandler(t *testing.T) {
+	t.Parallel()
 	logger := getLogger()
 	taskList := "taskList1"
 	testEvents := []*s.HistoryEvent{
@@ -154,6 +155,7 @@ func testActivityMultipleArgs(ctx context.Context, arg1 int, arg2 string, arg3 b
 }
 
 func TestCreateWorker(t *testing.T) {
+	t.Parallel()
 	// Create service endpoint
 	mockCtrl := gomock.NewController(t)
 	service := workflowservicetest.NewMockClient(mockCtrl)
@@ -166,6 +168,7 @@ func TestCreateWorker(t *testing.T) {
 }
 
 func TestCreateWorkerRun(t *testing.T) {
+	t.Parallel()
 	// Create service endpoint
 	mockCtrl := gomock.NewController(t)
 	service := workflowservicetest.NewMockClient(mockCtrl)
@@ -185,6 +188,7 @@ func TestCreateWorkerRun(t *testing.T) {
 }
 
 func TestNoActivitiesOrWorkflows(t *testing.T) {
+	t.Parallel()
 	mockCtrl := gomock.NewController(t)
 	service := workflowservicetest.NewMockClient(mockCtrl)
 
@@ -197,6 +201,7 @@ func TestNoActivitiesOrWorkflows(t *testing.T) {
 }
 
 func TestWorkerStartFailsWithInvalidDomain(t *testing.T) {
+	t.Parallel()
 
 	testCases := []struct {
 		domainErr  error
@@ -307,6 +312,7 @@ func createWorkerWithThrottle(
 }
 
 func TestCompleteActivity(t *testing.T) {
+	t.Parallel()
 	mockCtrl := gomock.NewController(t)
 	mockService := workflowservicetest.NewMockClient(mockCtrl)
 
@@ -337,6 +343,7 @@ func TestCompleteActivity(t *testing.T) {
 }
 
 func TestCompleteActivityById(t *testing.T) {
+	t.Parallel()
 	mockCtrl := gomock.NewController(t)
 	mockService := workflowservicetest.NewMockClient(mockCtrl)
 
@@ -371,6 +378,7 @@ func TestCompleteActivityById(t *testing.T) {
 }
 
 func TestRecordActivityHeartbeat(t *testing.T) {
+	t.Parallel()
 	mockCtrl := gomock.NewController(t)
 	mockService := workflowservicetest.NewMockClient(mockCtrl)
 
@@ -390,6 +398,7 @@ func TestRecordActivityHeartbeat(t *testing.T) {
 }
 
 func TestRecordActivityHeartbeatByID(t *testing.T) {
+	t.Parallel()
 	mockCtrl := gomock.NewController(t)
 	mockService := workflowservicetest.NewMockClient(mockCtrl)
 
@@ -431,6 +440,7 @@ func testEncodeFunction(t *testing.T, f interface{}, args ...interface{}) string
 }
 
 func TestEncoder(t *testing.T) {
+	t.Parallel()
 	getHostEnvironment().Encoder().Register(new(emptyCtx))
 	// Two param functor.
 	f1 := func(ctx Context, r []byte) string {
@@ -618,6 +628,7 @@ func testActivityReturnStructPtrPtr() (**testActivityResult, error) {
 }
 
 func TestVariousActivitySchedulingOption(t *testing.T) {
+	t.Parallel()
 	ts := &WorkflowTestSuite{}
 	env := ts.NewTestWorkflowEnvironment()
 	w := &activitiesCallingOptionsWorkflow{t: t}
@@ -664,6 +675,7 @@ func testWorkflowReturnStructPtrPtr(ctx Context, arg1 int) (result **testWorkflo
 }
 
 func TestRegisterVariousWorkflowTypes(t *testing.T) {
+	t.Parallel()
 	RegisterWorkflow(testWorkflowSample)
 	RegisterWorkflow(testWorkflowMultipleArgs)
 	RegisterWorkflow(testWorkflowNoArgs)
@@ -679,6 +691,7 @@ type testErrorDetails struct {
 }
 
 func TestActivityErrorWithDetails(t *testing.T) {
+	t.Parallel()
 	a1 := activityExecutor{
 		name: "test",
 		fn: func(arg1 int) (err error) {
@@ -745,6 +758,7 @@ func TestActivityErrorWithDetails(t *testing.T) {
 }
 
 func TestActivityCancelledError(t *testing.T) {
+	t.Parallel()
 	a1 := activityExecutor{
 		name: "test",
 		fn: func(arg1 int) (err error) {
@@ -806,6 +820,7 @@ func TestActivityCancelledError(t *testing.T) {
 }
 
 func TestActivityExecutionVariousTypes(t *testing.T) {
+	t.Parallel()
 	a1 := activityExecutor{
 		fn: func(ctx context.Context, arg1 string) (*testWorkflowResult, error) {
 			return &testWorkflowResult{V: 1}, nil
@@ -852,6 +867,7 @@ func testRegisterType(enc encoding, v interface{}) error {
 }
 
 func TestGobEncoding(t *testing.T) {
+	t.Parallel()
 	for _, et := range encodingTests {
 		for _, obj := range et.input {
 			err := testRegisterType(et.encoding, obj)
@@ -876,6 +892,7 @@ func TestGobEncoding(t *testing.T) {
 }
 
 func Test_ActivityNilArgs(t *testing.T) {
+	t.Parallel()
 	nilErr := errors.New("nils")
 	activityFn := func(name string, idx int, strptr *string) error {
 		if name == "" && idx == 0 && strptr == nil {

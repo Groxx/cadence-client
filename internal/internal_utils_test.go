@@ -27,6 +27,7 @@ import (
 )
 
 func TestChannelBuilderOptions(t *testing.T) {
+	t.Parallel()
 	builder := &contextBuilder{Timeout: defaultRPCTimeout}
 
 	opt1 := chanTimeout(time.Minute)

@@ -33,6 +33,7 @@ import (
 )
 
 func TestDispatcher(t *testing.T) {
+	t.Parallel()
 	value := "foo"
 	d := newDispatcher(background, func(ctx Context) { value = "bar" })
 	require.Equal(t, "foo", value)
@@ -42,6 +43,7 @@ func TestDispatcher(t *testing.T) {
 }
 
 func TestNonBlockingChildren(t *testing.T) {
+	t.Parallel()
 	var history []string
 	d := newDispatcher(background, func(ctx Context) {
 		for i := 0; i < 10; i++ {
@@ -60,6 +62,7 @@ func TestNonBlockingChildren(t *testing.T) {
 }
 
 func TestNonbufferedChannel(t *testing.T) {
+	t.Parallel()
 	var history []string
 	d := newDispatcher(background, func(ctx Context) {
 		c1 := NewChannel(ctx)
@@ -90,6 +93,7 @@ func TestNonbufferedChannel(t *testing.T) {
 }
 
 func TestNonbufferedChannelBlockedReceive(t *testing.T) {
+	t.Parallel()
 	var history []string
 	var c2 Channel
 	d := newDispatcher(background, func(ctx Context) {
@@ -132,6 +136,7 @@ func TestNonbufferedChannelBlockedReceive(t *testing.T) {
 }
 
 func TestBufferedChannelPut(t *testing.T) {
+	t.Parallel()
 	var history []string
 	d := newDispatcher(background, func(ctx Context) {
 		c1 := NewBufferedChannel(ctx, 1)
@@ -167,6 +172,7 @@ func TestBufferedChannelPut(t *testing.T) {
 }
 
 func TestBufferedChannelGet(t *testing.T) {
+	t.Parallel()
 	var history []string
 	d := newDispatcher(background, func(ctx Context) {
 		c1 := NewChannel(ctx)
@@ -222,6 +228,7 @@ func TestBufferedChannelGet(t *testing.T) {
 }
 
 func TestNotBlockingSelect(t *testing.T) {
+	t.Parallel()
 	var history []string
 	d := newDispatcher(background, func(ctx Context) {
 		c1 := NewBufferedChannel(ctx, 1)
@@ -259,6 +266,7 @@ func TestNotBlockingSelect(t *testing.T) {
 }
 
 func TestBlockingSelect(t *testing.T) {
+	t.Parallel()
 	var history []string
 	d := newDispatcher(background, func(ctx Context) {
 		c1 := NewChannel(ctx)
@@ -312,6 +320,7 @@ func TestBlockingSelect(t *testing.T) {
 }
 
 func TestBlockingSelectAsyncSend(t *testing.T) {
+	t.Parallel()
 	var history []string
 	d := newDispatcher(background, func(ctx Context) {
 
@@ -354,6 +363,7 @@ func TestBlockingSelectAsyncSend(t *testing.T) {
 }
 
 func TestBlockingSelectAsyncSend2(t *testing.T) {
+	t.Parallel()
 	var history []string
 	d := newDispatcher(background, func(ctx Context) {
 		c1 := NewBufferedChannel(ctx, 100)
@@ -399,6 +409,7 @@ func TestBlockingSelectAsyncSend2(t *testing.T) {
 }
 
 func TestSendSelect(t *testing.T) {
+	t.Parallel()
 	var history []string
 	d := newDispatcher(background, func(ctx Context) {
 		c1 := NewChannel(ctx)
@@ -440,6 +451,7 @@ func TestSendSelect(t *testing.T) {
 }
 
 func TestSendSelectWithAsyncReceive(t *testing.T) {
+	t.Parallel()
 	var history []string
 	d := newDispatcher(background, func(ctx Context) {
 		c1 := NewChannel(ctx)
@@ -482,6 +494,7 @@ func TestSendSelectWithAsyncReceive(t *testing.T) {
 }
 
 func TestChannelClose(t *testing.T) {
+	t.Parallel()
 	var history []string
 	d := newDispatcher(background, func(ctx Context) {
 		jobs := NewBufferedChannel(ctx, 5)
@@ -529,6 +542,7 @@ func TestChannelClose(t *testing.T) {
 }
 
 func TestSendClosedChannel(t *testing.T) {
+	t.Parallel()
 	d := newDispatcher(background, func(ctx Context) {
 		defer func() {
 			assert.NotNil(t, recover(), "panic expected")
@@ -544,6 +558,7 @@ func TestSendClosedChannel(t *testing.T) {
 }
 
 func TestBlockedSendClosedChannel(t *testing.T) {
+	t.Parallel()
 	d := newDispatcher(background, func(ctx Context) {
 		defer func() {
 			assert.NotNil(t, recover(), "panic expected")
@@ -558,6 +573,7 @@ func TestBlockedSendClosedChannel(t *testing.T) {
 }
 
 func TestAsyncSendClosedChannel(t *testing.T) {
+	t.Parallel()
 	d := newDispatcher(background, func(ctx Context) {
 		defer func() {
 			assert.NotNil(t, recover(), "panic expected")
@@ -571,6 +587,7 @@ func TestAsyncSendClosedChannel(t *testing.T) {
 	require.True(t, d.IsDone())
 }
 
+// TestDispatchClose should not be run in parallel - it counts goroutines as part of the test.
 func TestDispatchClose(t *testing.T) {
 	var history []string
 	d := newDispatcher(background, func(ctx Context) {
@@ -607,6 +624,7 @@ func TestDispatchClose(t *testing.T) {
 }
 
 func TestPanic(t *testing.T) {
+	t.Parallel()
 	var history []string
 	d := newDispatcher(background, func(ctx Context) {
 		c := NewNamedChannel(ctx, "forever_blocked")
@@ -634,6 +652,7 @@ func TestPanic(t *testing.T) {
 }
 
 func TestFutureSetValue(t *testing.T) {
+	t.Parallel()
 	var history []string
 	var f Future
 	var s Settable
@@ -684,6 +703,7 @@ func TestFutureSetValue(t *testing.T) {
 }
 
 func TestFutureFail(t *testing.T) {
+	t.Parallel()
 	var history []string
 	var f Future
 	var s Settable
@@ -733,6 +753,7 @@ func TestFutureFail(t *testing.T) {
 }
 
 func TestFutureSet(t *testing.T) {
+	t.Parallel()
 	var history []string
 	var f1, f2 Future
 	var s1, s2 Settable
@@ -811,6 +832,7 @@ func TestFutureSet(t *testing.T) {
 }
 
 func TestFutureChain(t *testing.T) {
+	t.Parallel()
 	var history []string
 	var f1, cf1, f2, cf2 Future
 	var s1, cs1, s2, cs2 Settable
@@ -892,6 +914,7 @@ func TestFutureChain(t *testing.T) {
 }
 
 func TestSelectFuture(t *testing.T) {
+	t.Parallel()
 	var history []string
 	d := newDispatcher(background, func(ctx Context) {
 		future1, settable1 := NewFuture(ctx)
@@ -944,6 +967,7 @@ func TestSelectFuture(t *testing.T) {
 }
 
 func TestSelectDecodeFuture(t *testing.T) {
+	t.Parallel()
 	var history []string
 	d := newDispatcher(background, func(ctx Context) {
 		future1, settable1 := newDecodeFuture(ctx, "testFn1")
@@ -996,6 +1020,7 @@ func TestSelectDecodeFuture(t *testing.T) {
 }
 
 func TestDecodeFutureChain(t *testing.T) {
+	t.Parallel()
 	var history []string
 	var f1, cf1, f2, cf2 Future
 	var s1, cs1, s2, cs2 Settable
@@ -1081,6 +1106,7 @@ func TestDecodeFutureChain(t *testing.T) {
 }
 
 func TestSelectFuture_WithBatchSets(t *testing.T) {
+	t.Parallel()
 	var history []string
 	d := newDispatcher(background, func(ctx Context) {
 		future1, settable1 := NewFuture(ctx)

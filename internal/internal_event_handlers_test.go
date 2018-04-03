@@ -31,6 +31,7 @@ import (
 )
 
 func TestReplayAwareLogger(t *testing.T) {
+	t.Parallel()
 	temp, err := ioutil.TempFile("", "cadence-client-test")
 	require.NoError(t, err, "Failed to create temp file.")
 	defer os.Remove(temp.Name())

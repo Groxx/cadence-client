@@ -29,6 +29,7 @@ import (
 )
 
 func Test_TimerStateMachine_CancelBeforeSent(t *testing.T) {
+	t.Parallel()
 	timerID := "test-timer-1"
 	attributes := &s.StartTimerDecisionAttributes{
 		TimerId: common.StringPtr(timerID),
@@ -43,6 +44,7 @@ func Test_TimerStateMachine_CancelBeforeSent(t *testing.T) {
 }
 
 func Test_TimerStateMachine_CancelAfterInitiated(t *testing.T) {
+	t.Parallel()
 	timerID := "test-timer-1"
 	attributes := &s.StartTimerDecisionAttributes{
 		TimerId: common.StringPtr(timerID),
@@ -68,6 +70,7 @@ func Test_TimerStateMachine_CancelAfterInitiated(t *testing.T) {
 }
 
 func Test_TimerStateMachine_CompletedAfterCancel(t *testing.T) {
+	t.Parallel()
 	timerID := "test-timer-1"
 	attributes := &s.StartTimerDecisionAttributes{
 		TimerId: common.StringPtr(timerID),
@@ -93,6 +96,7 @@ func Test_TimerStateMachine_CompletedAfterCancel(t *testing.T) {
 }
 
 func Test_TimerStateMachine_CompleteWithoutCancel(t *testing.T) {
+	t.Parallel()
 	timerID := "test-timer-1"
 	attributes := &s.StartTimerDecisionAttributes{
 		TimerId: common.StringPtr(timerID),
@@ -112,6 +116,7 @@ func Test_TimerStateMachine_CompleteWithoutCancel(t *testing.T) {
 }
 
 func Test_TimerStateMachine_PanicInvalidStateTransition(t *testing.T) {
+	t.Parallel()
 	timerID := "test-timer-1"
 	attributes := &s.StartTimerDecisionAttributes{
 		TimerId: common.StringPtr(timerID),
@@ -130,6 +135,7 @@ func Test_TimerStateMachine_PanicInvalidStateTransition(t *testing.T) {
 }
 
 func Test_ActivityStateMachine_CompleteWithoutCancel(t *testing.T) {
+	t.Parallel()
 	activityID := "test-activity-1"
 	attributes := &s.ScheduleActivityTaskDecisionAttributes{
 		ActivityId: common.StringPtr(activityID),
@@ -154,6 +160,7 @@ func Test_ActivityStateMachine_CompleteWithoutCancel(t *testing.T) {
 }
 
 func Test_ActivityStateMachine_CancelBeforeSent(t *testing.T) {
+	t.Parallel()
 	activityID := "test-activity-1"
 	attributes := &s.ScheduleActivityTaskDecisionAttributes{
 		ActivityId: common.StringPtr(activityID),
@@ -174,6 +181,7 @@ func Test_ActivityStateMachine_CancelBeforeSent(t *testing.T) {
 }
 
 func Test_ActivityStateMachine_CancelAfterSent(t *testing.T) {
+	t.Parallel()
 	activityID := "test-activity-1"
 	attributes := &s.ScheduleActivityTaskDecisionAttributes{
 		ActivityId: common.StringPtr(activityID),
@@ -206,6 +214,7 @@ func Test_ActivityStateMachine_CancelAfterSent(t *testing.T) {
 }
 
 func Test_ActivityStateMachine_CompletedAfterCancel(t *testing.T) {
+	t.Parallel()
 	activityID := "test-activity-1"
 	attributes := &s.ScheduleActivityTaskDecisionAttributes{
 		ActivityId: common.StringPtr(activityID),
@@ -238,6 +247,7 @@ func Test_ActivityStateMachine_CompletedAfterCancel(t *testing.T) {
 }
 
 func Test_ActivityStateMachine_PanicInvalidStateTransition(t *testing.T) {
+	t.Parallel()
 	activityID := "test-activity-1"
 	attributes := &s.ScheduleActivityTaskDecisionAttributes{
 		ActivityId: common.StringPtr(activityID),
@@ -266,6 +276,7 @@ func Test_ActivityStateMachine_PanicInvalidStateTransition(t *testing.T) {
 }
 
 func Test_ChildWorkflowStateMachine_Basic(t *testing.T) {
+	t.Parallel()
 	workflowID := "test-child-workflow-1"
 	attributes := &s.StartChildWorkflowExecutionDecisionAttributes{
 		WorkflowId: common.StringPtr(workflowID),
@@ -299,6 +310,7 @@ func Test_ChildWorkflowStateMachine_Basic(t *testing.T) {
 }
 
 func Test_ChildWorkflowStateMachine_CancelSucceed(t *testing.T) {
+	t.Parallel()
 	domain := "test-domain"
 	workflowID := "test-child-workflow"
 	runID := ""
@@ -343,6 +355,7 @@ func Test_ChildWorkflowStateMachine_CancelSucceed(t *testing.T) {
 }
 
 func Test_ChildWorkflowStateMachine_InvalidStates(t *testing.T) {
+	t.Parallel()
 	domain := "test-domain"
 	workflowID := "test-workflow-id"
 	runID := ""
@@ -425,6 +438,7 @@ func Test_ChildWorkflowStateMachine_InvalidStates(t *testing.T) {
 }
 
 func Test_ChildWorkflowStateMachine_CancelFailed(t *testing.T) {
+	t.Parallel()
 	domain := "test-domain"
 	workflowID := "test-workflow-id"
 	runID := ""
@@ -461,6 +475,7 @@ func Test_ChildWorkflowStateMachine_CancelFailed(t *testing.T) {
 }
 
 func Test_MarkerStateMachine(t *testing.T) {
+	t.Parallel()
 	h := newDecisionsHelper()
 
 	// record marker for side effect
@@ -475,6 +490,7 @@ func Test_MarkerStateMachine(t *testing.T) {
 }
 
 func Test_CancelExternalWorkflowStateMachine_Succeed(t *testing.T) {
+	t.Parallel()
 	domain := "test-domain"
 	workflowID := "test-workflow-id"
 	runID := "test-run-id"
@@ -521,6 +537,7 @@ func Test_CancelExternalWorkflowStateMachine_Succeed(t *testing.T) {
 }
 
 func Test_CancelExternalWorkflowStateMachine_Failed(t *testing.T) {
+	t.Parallel()
 	domain := "test-domain"
 	workflowID := "test-workflow-id"
 	runID := "test-run-id"

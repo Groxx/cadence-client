@@ -44,6 +44,7 @@ var errs = [][]error{
 }
 
 func Test_ActivityError(t *testing.T) {
+	t.Parallel()
 	errorActivityFn := func(i int) error {
 		return errs[i][0]
 	}
@@ -58,6 +59,7 @@ func Test_ActivityError(t *testing.T) {
 }
 
 func Test_ActivityPanic(t *testing.T) {
+	t.Parallel()
 	panicActivityFn := func() error {
 		panic("panic-blabla")
 	}
@@ -73,6 +75,7 @@ func Test_ActivityPanic(t *testing.T) {
 }
 
 func Test_WorkflowError(t *testing.T) {
+	t.Parallel()
 	errorWorkflowFn := func(ctx Context, i int) error {
 		return errs[i][0]
 	}
@@ -88,6 +91,7 @@ func Test_WorkflowError(t *testing.T) {
 }
 
 func Test_ErrorDetails(t *testing.T) {
+	t.Parallel()
 	timeoutErr := NewTimeoutError(shared.TimeoutTypeScheduleToStart)
 	require.False(t, timeoutErr.HasDetails())
 	var data string

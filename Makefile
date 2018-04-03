@@ -105,3 +105,6 @@ fmt:
 clean:
 	rm -Rf $(BUILD)
 	rm -Rf .gen
+
+hammer:
+	for i in {1..100}; do echo "Running num: $$i"; go test -race -count 1 ./... || exit 1 ; done
