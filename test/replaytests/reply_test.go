@@ -23,41 +23,20 @@ package replaytests
 import (
 	"testing"
 
-	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
-	"github.com/stretchr/testify/suite"
-	"go.uber.org/cadence/.gen/go/cadence/workflowservicetest"
 	"go.uber.org/cadence/worker"
-	"go.uber.org/zap"
+	"go.uber.org/zap/zaptest"
 )
 
-type replayTestSuite struct {
-	suite.Suite
-	mockCtrl *gomock.Controller
-	service  *workflowservicetest.MockClient
-}
-
-func TestReplayTestSuite(t *testing.T) {
-	s := new(replayTestSuite)
-	suite.Run(t, s)
-}
-
-func (s *replayTestSuite) SetupTest() {
-	s.mockCtrl = gomock.NewController(s.T())
-	s.service = workflowservicetest.NewMockClient(s.mockCtrl)
-}
-
-func (s *replayTestSuite) TearDownTest() {
-	s.mockCtrl.Finish() // assert mock’s expectations
-}
-
-func (s *replayTestSuite) TestReplayWorkflowHistoryFromFile() {
-	logger, _ := zap.NewDevelopment()
+func TestReplayWorkflowHistoryFromFile(t *testing.T) {
+	t.Parallel()
 	testFiles := []string{"basic.json", "basic_new.json", "version.json", "version_new.json"}
-	var err error
-
 	for _, testFile := range testFiles {
-		err = worker.ReplayWorkflowHistoryFromJSONFile(logger, testFile)
-		require.NoError(s.T(), err)
+		testFile := testFile
+		t.Run(testFile, func(t *testing.T) {
+			t.Parallel()
+			err := worker.ReplayWorkflowHistoryFromJSONFile(zaptest.NewLogger(t), testFile)
+			require.NoError(t, err)
+		})
 	}
 }
