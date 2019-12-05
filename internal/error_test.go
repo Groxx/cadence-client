@@ -55,6 +55,7 @@ var (
 )
 
 func Test_GenericError(t *testing.T) {
+	t.Parallel()
 	// test activity error
 	errorActivityFn := func() error {
 		return errors.New("error:foo")
@@ -79,6 +80,7 @@ func Test_GenericError(t *testing.T) {
 }
 
 func Test_ActivityNotRegistered(t *testing.T) {
+	t.Parallel()
 	registeredActivityFn, unregisteredActivitFn := "RegisteredActivity", "UnregisteredActivityFn"
 	RegisterActivityWithOptions(func() error { return nil }, RegisterActivityOptions{Name: registeredActivityFn})
 	s := &WorkflowTestSuite{}
@@ -91,6 +93,7 @@ func Test_ActivityNotRegistered(t *testing.T) {
 }
 
 func Test_TimeoutError(t *testing.T) {
+	t.Parallel()
 	timeoutErr := NewTimeoutError(shared.TimeoutTypeScheduleToStart)
 	require.False(t, timeoutErr.HasDetails())
 	var data string
@@ -103,9 +106,19 @@ func Test_TimeoutError(t *testing.T) {
 }
 
 func Test_TimeoutError_WithDetails(t *testing.T) {
-	testTimeoutErrorDetails(t, shared.TimeoutTypeHeartbeat)
-	testTimeoutErrorDetails(t, shared.TimeoutTypeScheduleToClose)
-	testTimeoutErrorDetails(t, shared.TimeoutTypeStartToClose)
+	t.Parallel()
+	t.Run("heartbeat", func(t *testing.T) {
+		t.Parallel()
+		testTimeoutErrorDetails(t, shared.TimeoutTypeHeartbeat)
+	})
+	t.Run("schedule to close", func(t *testing.T) {
+		t.Parallel()
+		testTimeoutErrorDetails(t, shared.TimeoutTypeScheduleToClose)
+	})
+	t.Run("start to close", func(t *testing.T) {
+		t.Parallel()
+		testTimeoutErrorDetails(t, shared.TimeoutTypeStartToClose)
+	})
 }
 
 func testTimeoutErrorDetails(t *testing.T, timeoutType shared.TimeoutType) {
@@ -144,6 +157,7 @@ func testTimeoutErrorDetails(t *testing.T, timeoutType shared.TimeoutType) {
 }
 
 func Test_CustomError(t *testing.T) {
+	t.Parallel()
 	// test ErrorDetailValues as Details
 	var a1 string
 	var a2 int
@@ -210,6 +224,7 @@ func Test_CustomError(t *testing.T) {
 }
 
 func Test_CustomError_Pointer(t *testing.T) {
+	t.Parallel()
 	a1 := testStruct2{}
 	err1 := NewCustomError(customErrReasonA, testErrorDetails4)
 	require.True(t, err1.HasDetails())
@@ -286,6 +301,7 @@ func Test_CustomError_Pointer(t *testing.T) {
 }
 
 func Test_CanceledError(t *testing.T) {
+	t.Parallel()
 	// test ErrorDetailValues as Details
 	var a1 string
 	var a2 int
@@ -344,6 +360,7 @@ func Test_CanceledError(t *testing.T) {
 }
 
 func Test_IsCanceledError(t *testing.T) {
+	t.Parallel()
 
 	tests := []struct {
 		name     string
@@ -373,6 +390,7 @@ func Test_IsCanceledError(t *testing.T) {
 }
 
 func TestErrorDetailsValues(t *testing.T) {
+	t.Parallel()
 	e := ErrorDetailsValues{}
 	require.Equal(t, ErrNoData, e.Get())
 
@@ -392,6 +410,7 @@ func TestErrorDetailsValues(t *testing.T) {
 }
 
 func Test_SignalExternalWorkflowExecutionFailedError(t *testing.T) {
+	t.Parallel()
 	context := &workflowEnvironmentImpl{
 		decisionsHelper: newDecisionsHelper(),
 		dataConverter:   getDefaultDataConverter(),
@@ -423,6 +442,7 @@ func Test_SignalExternalWorkflowExecutionFailedError(t *testing.T) {
 }
 
 func Test_ContinueAsNewError(t *testing.T) {
+	t.Parallel()
 	var a1 = 1234
 	var a2 = "some random input"
 
