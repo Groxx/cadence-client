@@ -1246,8 +1246,8 @@ func (s *WorkflowTestSuiteUnitTest) Test_GetVersion() {
 
 		// test searchable change version
 		wfInfo := GetWorkflowInfo(ctx)
-		s.NotNil(wfInfo.SearchAttributes)
-		changeVersionsBytes, ok := wfInfo.SearchAttributes.IndexedFields[CadenceChangeVersion]
+		s.NotNil(wfInfo.searchAttributes)
+		changeVersionsBytes, ok := wfInfo.searchAttributes.IndexedFields[CadenceChangeVersion]
 		s.True(ok)
 		var changeVersions []string
 		err = json.Unmarshal(changeVersionsBytes, &changeVersions)
@@ -1306,8 +1306,8 @@ func (s *WorkflowTestSuiteUnitTest) Test_MockGetVersion() {
 
 		// test searchable change version
 		wfInfo := GetWorkflowInfo(ctx)
-		s.NotNil(wfInfo.SearchAttributes)
-		changeVersionsBytes, ok := wfInfo.SearchAttributes.IndexedFields[CadenceChangeVersion]
+		s.NotNil(wfInfo.searchAttributes)
+		changeVersionsBytes, ok := wfInfo.searchAttributes.IndexedFields[CadenceChangeVersion]
 		s.True(ok)
 		var changeVersions []string
 		err = json.Unmarshal(changeVersionsBytes, &changeVersions)
@@ -1347,7 +1347,7 @@ func (s *WorkflowTestSuiteUnitTest) Test_UpsertSearchAttributes_ReservedKey() {
 		s.Error(err)
 
 		wfInfo := GetWorkflowInfo(ctx)
-		s.Nil(wfInfo.SearchAttributes)
+		s.Nil(wfInfo.searchAttributes)
 		return nil
 	}
 	env := s.NewTestWorkflowEnvironment()
@@ -1366,15 +1366,15 @@ func (s *WorkflowTestSuiteUnitTest) Test_MockUpsertSearchAttributes() {
 		s.Error(err)
 
 		wfInfo := GetWorkflowInfo(ctx)
-		s.Nil(wfInfo.SearchAttributes)
+		s.Nil(wfInfo.searchAttributes)
 
 		attr["CustomIntField"] = 1
 		err = UpsertSearchAttributes(ctx, attr)
 		s.NoError(err)
 
 		wfInfo = GetWorkflowInfo(ctx)
-		s.NotNil(wfInfo.SearchAttributes)
-		valBytes := wfInfo.SearchAttributes.IndexedFields["CustomIntField"]
+		s.NotNil(wfInfo.searchAttributes)
+		valBytes := wfInfo.searchAttributes.IndexedFields["CustomIntField"]
 		var result int
 		NewValue(valBytes).Get(&result)
 		s.Equal(1, result)

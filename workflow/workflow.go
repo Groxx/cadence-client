@@ -67,7 +67,7 @@ type (
 
 	// Info information about currently executing workflow
 	//
-	// transitive thrift exposure
+	// no thrift exposure possible
 	Info = internal.WorkflowInfo
 )
 

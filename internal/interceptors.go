@@ -29,9 +29,13 @@ import (
 )
 
 // WorkflowInterceptorFactory is used to create a single link in the interceptor chain
+//
+// no thrift exposure possible
 type WorkflowInterceptorFactory interface {
 	// NewInterceptor creates an interceptor instance. The created instance must delegate every call to
 	// the next parameter for workflow code function correctly.
+	//
+	// no thrift exposure possible
 	NewInterceptor(info *WorkflowInfo, next WorkflowInterceptor) WorkflowInterceptor
 }
 
@@ -42,6 +46,8 @@ type WorkflowInterceptorFactory interface {
 // All code in the interceptor is executed in the context of a workflow. So all the rules and restrictions
 // that apply to the workflow code should be obeyed by the interceptor implementation.
 // Use workflow.IsReplaying(ctx) to filter out duplicated calls.
+//
+// no thrift exposure possible
 type WorkflowInterceptor interface {
 	// Intercepts workflow function invocation. As calls to other intercepted functions are done from a workflow
 	// function this function is the first to be called and completes workflow as soon as it returns.

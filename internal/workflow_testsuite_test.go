@@ -43,10 +43,10 @@ func TestSetMemoOnStart(t *testing.T) {
 	memo = map[string]interface{}{
 		"memoKey": "memo",
 	}
-	require.Nil(t, env.impl.workflowInfo.Memo)
+	require.Nil(t, env.impl.workflowInfo.memo)
 	err = env.SetMemoOnStart(memo)
 	require.NoError(t, err)
-	require.NotNil(t, env.impl.workflowInfo.Memo)
+	require.NotNil(t, env.impl.workflowInfo.memo)
 }
 
 func TestSetSearchAttributesOnStart(t *testing.T) {
@@ -64,7 +64,7 @@ func TestSetSearchAttributesOnStart(t *testing.T) {
 	}
 	err = env.SetSearchAttributesOnStart(searchAttr)
 	require.NoError(t, err)
-	require.NotNil(t, env.impl.workflowInfo.SearchAttributes)
+	require.NotNil(t, env.impl.workflowInfo.searchAttributes)
 }
 
 func TestUnregisteredActivity(t *testing.T) {

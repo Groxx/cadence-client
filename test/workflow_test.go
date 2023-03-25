@@ -30,6 +30,7 @@ import (
 	"go.uber.org/cadence"
 	"go.uber.org/cadence/.gen/go/shared"
 	"go.uber.org/cadence/client"
+	"go.uber.org/cadence/encoded"
 	"go.uber.org/cadence/internal"
 	"go.uber.org/cadence/worker"
 	"go.uber.org/cadence/workflow"
@@ -212,15 +213,15 @@ func (w *Workflows) ContinueAsNewWithOptions(ctx workflow.Context, count int, ta
 		return "", fmt.Errorf("invalid taskListName name, expected=%v, got=%v", taskList, tl)
 	}
 
-	if info.Memo == nil || info.SearchAttributes == nil {
+	if len(info.MemoKeys()) == 0 || len(info.SearchAttributeKeys()) == 0 {
 		return "", errors.New("memo or search attributes are not carried over")
 	}
 	var memoVal, searchAttrVal string
-	err := client.NewValue(info.Memo.Fields["memoKey"]).Get(&memoVal)
+	err := info.GetMemo(encoded.GetDefaultDataConverter(), "memoKey", &memoVal)
 	if err != nil {
 		return "", errors.New("error when get memo value")
 	}
-	err = client.NewValue(info.SearchAttributes.IndexedFields["CustomKeywordField"]).Get(&searchAttrVal)
+	err = info.GetSearchAttribute("CustomKeywordField", &searchAttrVal)
 	if err != nil {
 		return "", errors.New("error when get search attributes value")
 	}
@@ -523,11 +524,11 @@ func (w *Workflows) child(ctx workflow.Context, arg string, mustFail bool) (stri
 func (w *Workflows) childForMemoAndSearchAttr(ctx workflow.Context) (result string, err error) {
 	info := workflow.GetInfo(ctx)
 	var memo, searchAttr string
-	err = client.NewValue(info.Memo.Fields["memoKey"]).Get(&memo)
+	err = info.GetMemo(encoded.GetDefaultDataConverter(), "memoKey", &memo)
 	if err != nil {
 		return
 	}
-	err = client.NewValue(info.SearchAttributes.IndexedFields["CustomKeywordField"]).Get(&searchAttr)
+	err = info.GetSearchAttribute("CustomKeywordField", &searchAttr)
 	if err != nil {
 		return
 	}

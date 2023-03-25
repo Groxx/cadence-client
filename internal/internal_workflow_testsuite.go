@@ -1964,7 +1964,7 @@ func (env *testWorkflowEnvironmentImpl) UpsertSearchAttributes(attributes map[st
 	}
 
 	attr, err := validateAndSerializeSearchAttributes(attributes)
-	env.workflowInfo.SearchAttributes = mergeSearchAttributes(env.workflowInfo.SearchAttributes, attr)
+	env.workflowInfo.searchAttributes = mergeSearchAttributes(env.workflowInfo.searchAttributes, attr)
 	return err
 }
 

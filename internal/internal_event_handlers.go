@@ -336,7 +336,7 @@ func (wc *workflowEnvironmentImpl) UpsertSearchAttributes(attributes map[string]
 }
 
 func (wc *workflowEnvironmentImpl) updateWorkflowInfoWithSearchAttributes(attributes *shared.SearchAttributes) {
-	wc.workflowInfo.SearchAttributes = mergeSearchAttributes(wc.workflowInfo.SearchAttributes, attributes)
+	wc.workflowInfo.searchAttributes = mergeSearchAttributes(wc.workflowInfo.searchAttributes, attributes)
 }
 
 func mergeSearchAttributes(current, upsert *shared.SearchAttributes) *shared.SearchAttributes {

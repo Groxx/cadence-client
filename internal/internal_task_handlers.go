@@ -645,9 +645,9 @@ func (wth *workflowTaskHandlerImpl) createWorkflowContext(task *s.PollForDecisio
 		ContinuedExecutionRunID:             attributes.ContinuedExecutionRunId,
 		ParentWorkflowDomain:                attributes.ParentWorkflowDomain,
 		ParentWorkflowExecution:             parentWorkflowExecution,
-		Memo:                                attributes.Memo,
-		SearchAttributes:                    attributes.SearchAttributes,
-		RetryPolicy:                         attributes.RetryPolicy,
+		memo:                                attributes.Memo,
+		searchAttributes:                    attributes.SearchAttributes,
+		RetryPolicy:                         fromThriftRetryPolicy(attributes.RetryPolicy),
 	}
 
 	wfStartTime := time.Unix(0, h.Events[0].GetTimestamp())
@@ -1556,9 +1556,9 @@ func (wth *workflowTaskHandlerImpl) completeWorkflow(
 			ExecutionStartToCloseTimeoutSeconds: contErr.params.executionStartToCloseTimeoutSeconds,
 			TaskStartToCloseTimeoutSeconds:      contErr.params.taskStartToCloseTimeoutSeconds,
 			Header:                              contErr.params.header,
-			Memo:                                workflowContext.workflowInfo.Memo,
-			SearchAttributes:                    workflowContext.workflowInfo.SearchAttributes,
-			RetryPolicy:                         workflowContext.workflowInfo.RetryPolicy,
+			Memo:                                workflowContext.workflowInfo.memo,
+			SearchAttributes:                    workflowContext.workflowInfo.searchAttributes,
+			RetryPolicy:                         convertRetryPolicy(workflowContext.workflowInfo.RetryPolicy),
 		}
 	} else if workflowContext.err != nil {
 		// Workflow failures

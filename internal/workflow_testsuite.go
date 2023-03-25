@@ -658,7 +658,7 @@ func (t *TestWorkflowEnvironment) SetMemoOnStart(memo map[string]interface{}) er
 	if err != nil {
 		return err
 	}
-	t.impl.workflowInfo.Memo = memoStruct
+	t.impl.workflowInfo.memo = memoStruct
 	return nil
 }
 
@@ -668,6 +668,6 @@ func (t *TestWorkflowEnvironment) SetSearchAttributesOnStart(searchAttributes ma
 	if err != nil {
 		return err
 	}
-	t.impl.workflowInfo.SearchAttributes = attr
+	t.impl.workflowInfo.searchAttributes = attr
 	return nil
 }
