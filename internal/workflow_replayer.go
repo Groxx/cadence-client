@@ -191,6 +191,8 @@ func (r *WorkflowReplayer) ReplayPartialWorkflowHistoryFromJSONFile(logger *zap.
 
 // ReplayWorkflowExecution replays workflow execution loading it from Cadence service.
 // The logger is an optional parameter. Defaults to the noop logger.
+//
+// TODO: thrift exposure, remove
 func (r *WorkflowReplayer) ReplayWorkflowExecution(
 	ctx context.Context,
 	service workflowserviceclient.Interface,

@@ -27,6 +27,7 @@ import (
 
 type (
 	// WorkflowInterceptorFactory is used to create a single link in the interceptor chain
+	//
 	// transitive thrift exposure
 	WorkflowInterceptorFactory = internal.WorkflowInterceptorFactory
 
@@ -37,11 +38,13 @@ type (
 	// All code in the interceptor is executed in the workflow.Context of a workflow. So all the rules and restrictions
 	// that apply to the workflow code should be obeyed by the interceptor implementation.
 	// Use workflow.IsReplaying(ctx) to filter out duplicated calls.
+	//
 	// transitive thrift exposure
 	WorkflowInterceptor = internal.WorkflowInterceptor
 
 	// WorkflowInterceptorBase is a noop implementation of WorkflowInterceptor that just forwards requests
 	// to the next link in an interceptor chain. To be used as base implementation of interceptors.
+	//
 	// transitive thrift exposure
 	WorkflowInterceptorBase = internal.WorkflowInterceptorBase
 )

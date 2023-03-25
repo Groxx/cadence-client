@@ -49,14 +49,17 @@ const (
 
 type (
 	// Options are optional parameters for Client creation.
+	//
 	// no thrift exposure possible
 	Options = internal.ClientOptions
 
 	// FeatureFlags define which breaking changes can be enabled for client
+	//
 	// no thrift exposure possible
 	FeatureFlags = internal.FeatureFlags
 
 	// StartWorkflowOptions configuration parameters for starting a workflow execution.
+	//
 	// no thrift exposure possible
 	StartWorkflowOptions = internal.StartWorkflowOptions
 
@@ -65,33 +68,40 @@ type (
 	HistoryEventIterator = internal.HistoryEventIterator
 
 	// WorkflowRun represents a started non child workflow
+	//
 	// no thrift exposure possible
 	WorkflowRun = internal.WorkflowRun
 
 	// WorkflowIDReusePolicy defines workflow ID reuse behavior.
+	//
 	// no thrift exposure possible
 	WorkflowIDReusePolicy = internal.WorkflowIDReusePolicy
 
 	// QueryWorkflowWithOptionsRequest defines the request to QueryWorkflowWithOptions
+	//
 	// transitive thrift exposure
 	QueryWorkflowWithOptionsRequest = internal.QueryWorkflowWithOptionsRequest
 
 	// QueryWorkflowWithOptionsResponse defines the response to QueryWorkflowWithOptions
+	//
 	// transitive thrift exposure
 	QueryWorkflowWithOptionsResponse = internal.QueryWorkflowWithOptionsResponse
 
 	// ParentClosePolicy defines the behavior performed on a child workflow when its parent is closed
+	//
 	// no thrift exposure possible
 	ParentClosePolicy = internal.ParentClosePolicy
 
 	// CancelOption values are functional options for the CancelWorkflow method.
 	// Supported values can be created with:
 	//  - WithCancelReason(...)
+	//
 	// no thrift exposure possible
 	CancelOption = internal.Option
 
 	// Client is the client for starting and getting information about a workflow executions as well as
 	// completing activities asynchronously.
+	//
 	// transitive thrift exposure
 	Client interface {
 		// StartWorkflow starts a workflow execution
@@ -105,6 +115,7 @@ type (
 		//	- BadRequestError
 		//	- WorkflowExecutionAlreadyStartedError
 		//	- InternalServiceError
+		//
 		// no thrift exposure possible
 		StartWorkflow(ctx context.Context, options StartWorkflowOptions, workflowFunc interface{}, args ...interface{}) (*workflow.Execution, error)
 
@@ -131,6 +142,7 @@ type (
 		// the second run has run ID "run ID 2" and return some result other than ContinueAsNewError:
 		// GetRunID() will always return "run ID 1" and  Get(ctx context.Context, valuePtr interface{}) will return the result of second run.
 		// NOTE: DO NOT USE THIS API INSIDE A WORKFLOW, USE workflow.ExecuteChildWorkflow instead
+		//
 		// no thrift exposure possible
 		ExecuteWorkflow(ctx context.Context, options StartWorkflowOptions, workflow interface{}, args ...interface{}) (WorkflowRun, error)
 
@@ -150,6 +162,7 @@ type (
 		// Say ExecuteWorkflow started a workflow, in its first run, has run ID "run ID 1", and returned ContinueAsNewError,
 		// the second run has run ID "run ID 2" and return some result other than ContinueAsNewError:
 		// GetRunID() will always return "run ID 1" and  Get(ctx context.Context, valuePtr interface{}) will return the result of second run.
+		//
 		// no thrift exposure possible
 		GetWorkflow(ctx context.Context, workflowID string, runID string) WorkflowRun
 
@@ -162,6 +175,7 @@ type (
 		//	- EntityNotExistsError
 		//	- InternalServiceError
 		//	- WorkflowExecutionAlreadyCompletedError
+		//
 		// no thrift exposure possible
 		SignalWorkflow(ctx context.Context, workflowID string, runID string, signalName string, arg interface{}) error
 
@@ -173,6 +187,7 @@ type (
 		//  - EntityNotExistsError, if domain does not exist
 		//  - BadRequestError
 		//	- InternalServiceError
+		//
 		// no thrift exposure possible
 		SignalWithStartWorkflow(ctx context.Context, workflowID string, signalName string, signalArg interface{},
 			options StartWorkflowOptions, workflowFunc interface{}, workflowArgs ...interface{}) (*workflow.Execution, error)
@@ -185,6 +200,7 @@ type (
 		//	- BadRequestError
 		//	- InternalServiceError
 		//	- WorkflowExecutionAlreadyCompletedError
+		//
 		// no thrift exposure possible
 		CancelWorkflow(ctx context.Context, workflowID string, runID string, opts ...CancelOption) error
 
@@ -197,6 +213,7 @@ type (
 		//	- BadRequestError
 		//	- InternalServiceError
 		//	- WorkflowExecutionAlreadyCompletedError
+		//
 		// no thrift exposure possible
 		TerminateWorkflow(ctx context.Context, workflowID string, runID string, reason string, details []byte) error
 
@@ -218,7 +235,8 @@ type (
 		//			}
 		//			events = append(events, event)
 		//		}
-		// TODO: filter type is thrift, also iterator
+		//
+		// TODO: thrift exposure
 		GetWorkflowHistory(ctx context.Context, workflowID string, runID string, isLongPoll bool, filterType s.HistoryEventFilterType) HistoryEventIterator
 
 		// CompleteActivity reports activity completed.
@@ -234,6 +252,7 @@ type (
 		//	To fail the activity with an error.
 		//      CompleteActivity(token, nil, cadence.NewCustomError("reason", details)
 		// The activity can fail with below errors ErrorWithDetails, TimeoutError, CanceledError.
+		//
 		// no thrift exposure possible
 		CompleteActivity(ctx context.Context, taskToken []byte, result interface{}, err error) error
 
@@ -250,6 +269,7 @@ type (
 		//  - ErrorWithDetails
 		//  - TimeoutError
 		//  - CanceledError
+		//
 		// no thrift exposure possible
 		CompleteActivityByID(ctx context.Context, domain, workflowID, runID, activityID string, result interface{}, err error) error
 
@@ -259,6 +279,7 @@ type (
 		// The errors it can return:
 		//	- EntityNotExistsError
 		//	- InternalServiceError
+		//
 		// no thrift exposure possible
 		RecordActivityHeartbeat(ctx context.Context, taskToken []byte, details ...interface{}) error
 
@@ -267,6 +288,7 @@ type (
 		// The errors it can return:
 		//	- EntityNotExistsError
 		//	- InternalServiceError
+		//
 		// no thrift exposure possible
 		RecordActivityHeartbeatByID(ctx context.Context, domain, workflowID, runID, activityID string, details ...interface{}) error
 
@@ -279,7 +301,8 @@ type (
 		//  - BadRequestError
 		//  - InternalServiceError
 		//  - EntityNotExistError
-		// TODO: thrift args/response
+		//
+		// TODO: thrift exposure
 		ListClosedWorkflow(ctx context.Context, request *s.ListClosedWorkflowExecutionsRequest) (*s.ListClosedWorkflowExecutionsResponse, error)
 
 		// ListOpenWorkflow gets open workflow executions based on request filters.
@@ -289,7 +312,8 @@ type (
 		//  - BadRequestError
 		//  - InternalServiceError
 		//  - EntityNotExistError
-		// TODO: thrift args/response
+		//
+		// TODO: thrift exposure
 		ListOpenWorkflow(ctx context.Context, request *s.ListOpenWorkflowExecutionsRequest) (*s.ListOpenWorkflowExecutionsResponse, error)
 
 		// ListWorkflow gets workflow executions based on query. This API only works with ElasticSearch,
@@ -303,7 +327,8 @@ type (
 		// The errors it can return:
 		//  - BadRequestError
 		//  - InternalServiceError
-		// TODO: thrift args/response
+		//
+		// TODO: thrift exposure
 		ListWorkflow(ctx context.Context, request *s.ListWorkflowExecutionsRequest) (*s.ListWorkflowExecutionsResponse, error)
 
 		// ListArchivedWorkflow gets archived workflow executions based on query. This API will return BadRequest if Cadence
@@ -313,7 +338,8 @@ type (
 		// The errors it can return:
 		//  - BadRequestError
 		//  - InternalServiceError
-		// TODO: thrift args/response
+		//
+		// TODO: thrift exposure
 		ListArchivedWorkflow(ctx context.Context, request *s.ListArchivedWorkflowExecutionsRequest) (*s.ListArchivedWorkflowExecutionsResponse, error)
 
 		// ScanWorkflow gets workflow executions based on query. This API only works with ElasticSearch,
@@ -325,7 +351,8 @@ type (
 		// The errors it can return:
 		//  - BadRequestError
 		//  - InternalServiceError
-		// TODO: thrift args/response
+		//
+		// TODO: thrift exposure
 		ScanWorkflow(ctx context.Context, request *s.ListWorkflowExecutionsRequest) (*s.ListWorkflowExecutionsResponse, error)
 
 		// CountWorkflow gets number of workflow executions based on query. This API only works with ElasticSearch,
@@ -334,13 +361,15 @@ type (
 		// The errors it can return:
 		//  - BadRequestError
 		//  - InternalServiceError
-		// TODO: thrift args/response
+		//
+		// TODO: thrift exposure
 		CountWorkflow(ctx context.Context, request *s.CountWorkflowExecutionsRequest) (*s.CountWorkflowExecutionsResponse, error)
 
 		// GetSearchAttributes returns valid search attributes keys and value types.
 		// The search attributes can be used in query of List/Scan/Count APIs. Adding new search attributes requires cadence server
 		// to update dynamic config ValidSearchAttributes.
-		// TODO: thrift args/response
+		//
+		// TODO: thrift exposure
 		GetSearchAttributes(ctx context.Context) (*s.GetSearchAttributesResponse, error)
 
 		// QueryWorkflow queries a given workflow's last execution and returns the query result synchronously. Parameter workflowID
@@ -380,7 +409,8 @@ type (
 		//  - BadRequestError
 		//  - InternalServiceError
 		//  - EntityNotExistError
-		// TODO: thrift args/response
+		//
+		// TODO: thrift exposure
 		ResetWorkflow(ctx context.Context, request *s.ResetWorkflowExecutionRequest) (*s.ResetWorkflowExecutionResponse, error)
 
 		// DescribeWorkflowExecution returns information about the specified workflow execution.
@@ -390,7 +420,8 @@ type (
 		//  - BadRequestError
 		//  - InternalServiceError
 		//  - EntityNotExistError
-		// TODO: thrift args/response
+		//
+		// TODO: thrift exposure
 		DescribeWorkflowExecution(ctx context.Context, workflowID, runID string) (*s.DescribeWorkflowExecutionResponse, error)
 
 		// DescribeTaskList returns information about the target tasklist, right now this API returns the
@@ -399,7 +430,8 @@ type (
 		//  - BadRequestError
 		//  - InternalServiceError
 		//  - EntityNotExistError
-		// TODO: thrift args/response
+		//
+		// TODO: thrift exposure
 		DescribeTaskList(ctx context.Context, tasklist string, tasklistType s.TaskListType) (*s.DescribeTaskListResponse, error)
 
 		// RefreshWorkflowTasks refreshes all the tasks of a given workflow.
@@ -423,7 +455,8 @@ type (
 		//	- DomainAlreadyExistsError
 		//	- BadRequestError
 		//	- InternalServiceError
-		// TODO: thrift args/response
+		//
+		// TODO: thrift exposure
 		Register(ctx context.Context, request *s.RegisterDomainRequest) error
 
 		// Describe a domain. The domain has 3 part of information
@@ -434,7 +467,8 @@ type (
 		//	- EntityNotExistsError
 		//	- BadRequestError
 		//	- InternalServiceError
-		// TODO: thrift args/response
+		//
+		// TODO: thrift exposure
 		Describe(ctx context.Context, name string) (*s.DescribeDomainResponse, error)
 
 		// Update a domain.
@@ -442,7 +476,8 @@ type (
 		//	- EntityNotExistsError
 		//	- BadRequestError
 		//	- InternalServiceError
-		// TODO: thrift args/response
+		//
+		// TODO: thrift exposure
 		Update(ctx context.Context, request *s.UpdateDomainRequest) error
 	}
 )
@@ -475,13 +510,15 @@ const (
 )
 
 // NewClient creates an instance of a workflow client
-// TODO: very protocol-specific
+//
+// TODO: thrift exposure
 func NewClient(service workflowserviceclient.Interface, domain string, options *Options) Client {
 	return internal.NewClient(service, domain, options)
 }
 
 // NewDomainClient creates an instance of a domain client, to manage lifecycle of domains.
-// TODO: very protocol-specific
+//
+// TODO: thrift exposure
 func NewDomainClient(service workflowserviceclient.Interface, options *Options) DomainClient {
 	return internal.NewDomainClient(service, options)
 }
@@ -533,6 +570,7 @@ func NewValues(data []byte) encoded.Values {
 // *workflow.PanicError, *workflow.UnknownExternalWorkflowExecutionError
 //
 // See documentation for each error type for details.
+//
 // no thrift exposure possible
 func IsWorkflowError(err error) bool {
 	var custom *cadence.CustomError
@@ -574,6 +612,7 @@ func IsWorkflowError(err error) bool {
 // WithCancelReason can be passed to Client.CancelWorkflow to provide an explicit cancellation reason,
 // which will be recorded in the cancellation event in the workflow's history, similar to termination reasons.
 // This is purely informational, and does not influence Cadence behavior at all.
+//
 // no thrift exposure possible
 func WithCancelReason(reason string) CancelOption {
 	return internal.WithCancelReason(reason)

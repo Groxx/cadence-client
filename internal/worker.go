@@ -306,7 +306,8 @@ func NewWorker(
 // The logger is the only optional parameter. Defaults to the noop logger.
 // Deprecated: Global workflow replay methods are replaced by equivalent WorkflowReplayer instance methods.
 // This method is kept to maintain backward compatibility and should not be used.
-// transitive thrift exposure
+//
+// TODO: thrift exposure, remove
 func ReplayWorkflowExecution(
 	ctx context.Context,
 	service workflowserviceclient.Interface,
@@ -323,7 +324,8 @@ func ReplayWorkflowExecution(
 // The logger is an optional parameter. Defaults to the noop logger.
 // Deprecated: Global workflow replay methods are replaced by equivalent WorkflowReplayer instance methods.
 // This method is kept to maintain backward compatibility and should not be used.
-// TODO: thrift arg/response, remove
+//
+// TODO: thrift exposure, remove
 func ReplayWorkflowHistory(logger *zap.Logger, history *shared.History) error {
 	r := NewWorkflowReplayer()
 	return r.ReplayWorkflowHistory(logger, history)
