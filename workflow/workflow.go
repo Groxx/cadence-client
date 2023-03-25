@@ -30,28 +30,44 @@ import (
 type (
 
 	// ChildWorkflowFuture represents the result of a child workflow execution
+	//
+	// no thrift exposure possible
 	ChildWorkflowFuture = internal.ChildWorkflowFuture
 
 	// Type identifies a workflow type.
+	//
+	// no thrift exposure possible
 	Type = internal.WorkflowType
 
 	// Execution Details.
+	//
+	// no thrift exposure possible
 	Execution = internal.WorkflowExecution
 
 	// Version represents a change version. See GetVersion call.
+	//
+	// no thrift exposure possible
 	Version = internal.Version
 
 	// ChildWorkflowOptions stores all child workflow specific parameters that will be stored inside of a Context.
+	//
+	// no thrift exposure possible
 	ChildWorkflowOptions = internal.ChildWorkflowOptions
 
 	// Bugports contains opt-in flags for backports of old, buggy behavior that has been fixed.
 	// See the internal docs for details.
+	//
+	// no thrift exposure possible
 	Bugports = internal.Bugports
 
 	// RegisterOptions consists of options for registering a workflow
+	//
+	// no thrift exposure possible
 	RegisterOptions = internal.RegisterWorkflowOptions
 
 	// Info information about currently executing workflow
+	//
+	// transitive thrift exposure
 	Info = internal.WorkflowInfo
 )
 
@@ -68,6 +84,8 @@ type (
 // This method calls panic if workflowFunc doesn't comply with the expected format.
 // Deprecated: Global workflow registration methods are replaced by equivalent Worker instance methods.
 // This method is kept to maintain backward compatibility and should not be used.
+//
+// no thrift exposure possible
 func Register(workflowFunc interface{}) {
 	internal.RegisterWorkflow(workflowFunc)
 }
@@ -91,11 +109,15 @@ func Register(workflowFunc interface{}) {
 // This method calls panic if workflowFunc doesn't comply with the expected format.
 // Deprecated: Global workflow registration methods are replaced by equivalent Worker instance methods.
 // This method is kept to maintain backward compatibility and should not be used.
+//
+// no thrift exposure possible
 func RegisterWithOptions(workflowFunc interface{}, opts RegisterOptions) {
 	internal.RegisterWorkflowWithOptions(workflowFunc, opts)
 }
 
 // GetRegisteredWorkflowTypes returns the registered workflow function/alias names.
+//
+// no thrift exposure possible
 func GetRegisteredWorkflowTypes() []string {
 	return internal.GetRegisteredWorkflowTypes()
 }
@@ -127,6 +149,8 @@ func GetRegisteredWorkflowTypes() []string {
 // error CanceledError.
 //
 // ExecuteActivity returns Future with activity result or failure.
+//
+// no thrift exposure possible
 func ExecuteActivity(ctx Context, activity interface{}, args ...interface{}) Future {
 	return internal.ExecuteActivity(ctx, activity, args...)
 }
@@ -170,6 +194,8 @@ func ExecuteActivity(ctx Context, activity interface{}, args ...interface{}) Fut
 // with error CanceledError.
 //
 // ExecuteLocalActivity returns Future with local activity result or failure.
+//
+// no thrift exposure possible
 func ExecuteLocalActivity(ctx Context, activity interface{}, args ...interface{}) Future {
 	return internal.ExecuteLocalActivity(ctx, activity, args...)
 }
@@ -192,26 +218,36 @@ func ExecuteLocalActivity(ctx Context, activity interface{}, args ...interface{}
 // You can cancel the pending child workflow using context(workflow.WithCancel(ctx)) and that will fail the workflow with
 // error CanceledError.
 // ExecuteChildWorkflow returns ChildWorkflowFuture.
+//
+// no thrift exposure possible
 func ExecuteChildWorkflow(ctx Context, childWorkflow interface{}, args ...interface{}) ChildWorkflowFuture {
 	return internal.ExecuteChildWorkflow(ctx, childWorkflow, args...)
 }
 
 // GetInfo extracts info of a current workflow from a context.
+//
+// transitive thrift exposure
 func GetInfo(ctx Context) *Info {
 	return internal.GetWorkflowInfo(ctx)
 }
 
 // GetLogger returns a logger to be used in workflow's context
+//
+// no thrift exposure possible
 func GetLogger(ctx Context) *zap.Logger {
 	return internal.GetLogger(ctx)
 }
 
 // GetUnhandledSignalNames returns signal names that have  unconsumed signals.
+//
+// no thrift exposure possible
 func GetUnhandledSignalNames(ctx Context) []string {
 	return internal.GetUnhandledSignalNames(ctx)
 }
 
 // GetMetricsScope returns a metrics scope to be used in workflow's context
+//
+// no thrift exposure possible
 func GetMetricsScope(ctx Context) tally.Scope {
 	return internal.GetMetricsScope(ctx)
 }
@@ -226,6 +262,8 @@ func GetMetricsScope(ctx Context) tally.Scope {
 //	ctx := WithWorkflowDomain(ctx, "domain-name")
 //
 // RequestCancelExternalWorkflow return Future with failure or empty success result.
+//
+// no thrift exposure possible
 func RequestCancelExternalWorkflow(ctx Context, workflowID, runID string) Future {
 	return internal.RequestCancelExternalWorkflow(ctx, workflowID, runID)
 }
@@ -240,11 +278,15 @@ func RequestCancelExternalWorkflow(ctx Context, workflowID, runID string) Future
 //	ctx := WithWorkflowDomain(ctx, "domain-name")
 //
 // SignalExternalWorkflow return Future with failure or empty success result.
+//
+// no thrift exposure possible
 func SignalExternalWorkflow(ctx Context, workflowID, runID, signalName string, arg interface{}) Future {
 	return internal.SignalExternalWorkflow(ctx, workflowID, runID, signalName, arg)
 }
 
 // GetSignalChannel returns channel corresponding to the signal name.
+//
+// no thrift exposure possible
 func GetSignalChannel(ctx Context, signalName string) Channel {
 	return internal.GetSignalChannel(ctx, signalName)
 }
@@ -288,6 +330,8 @@ func GetSignalChannel(ctx Context, signalName string) Channel {
 //	} else {
 //	       ....
 //	}
+//
+// no thrift exposure possible
 func SideEffect(ctx Context, f func(ctx Context) interface{}) encoded.Value {
 	return internal.SideEffect(ctx, f)
 }
@@ -308,11 +352,15 @@ func SideEffect(ctx Context, f func(ctx Context) interface{}) encoded.Value {
 // value as it was returning during the non-replay run.
 //
 // One good use case of MutableSideEffect() is to access dynamically changing config without breaking determinism.
+//
+// no thrift exposure possible
 func MutableSideEffect(ctx Context, id string, f func(ctx Context) interface{}, equals func(a, b interface{}) bool) encoded.Value {
 	return internal.MutableSideEffect(ctx, id, f, equals)
 }
 
 // DefaultVersion is a version returned by GetVersion for code that wasn't versioned before
+//
+// no thrift exposure possible
 const DefaultVersion Version = internal.DefaultVersion
 
 // GetVersion is used to safely perform backwards incompatible changes to workflow definitions.
@@ -380,6 +428,8 @@ const DefaultVersion Version = internal.DefaultVersion
 //	} else {
 //	  err = workflow.ExecuteActivity(ctx, qux, data).Get(ctx, nil)
 //	}
+//
+// no thrift exposure possible
 func GetVersion(ctx Context, changeID string, minSupported, maxSupported Version) Version {
 	return internal.GetVersion(ctx, changeID, minSupported, maxSupported)
 }
@@ -423,6 +473,8 @@ func GetVersion(ctx Context, changeID string, minSupported, maxSupported Version
 //	  currentState = "done"
 //	  return nil
 //	}
+//
+// no thrift exposure possible
 func SetQueryHandler(ctx Context, queryType string, handler interface{}) error {
 	return internal.SetQueryHandler(ctx, queryType, handler)
 }
@@ -440,6 +492,8 @@ func SetQueryHandler(ctx Context, queryType string, handler interface{}) error {
 // on the failure. If workflow don't want to be blocked on those failure, it should ignore those failure; if workflow do
 // want to make sure it proceed only when that action succeed then it should panic on that failure. Panic raised from a
 // workflow causes decision task to fail and cadence server will rescheduled later to retry.
+//
+// no thrift exposure possible
 func IsReplaying(ctx Context) bool {
 	return internal.IsReplaying(ctx)
 }
@@ -449,6 +503,8 @@ func IsReplaying(ctx Context) bool {
 // If a cron workflow wants to pass some data to next schedule, it can return any data and that data will become
 // available when next run starts.
 // This HasLastCompletionResult() checks if there is such data available passing down from previous successful run.
+//
+// no thrift exposure possible
 func HasLastCompletionResult(ctx Context) bool {
 	return internal.HasLastCompletionResult(ctx)
 }
@@ -459,6 +515,8 @@ func HasLastCompletionResult(ctx Context) bool {
 // available when next run starts.
 // This GetLastCompletionResult() extract the data into expected data structure.
 // See TestWorkflowEnvironment.SetLastCompletionResult() for unit test support.
+//
+// no thrift exposure possible
 func GetLastCompletionResult(ctx Context, d ...interface{}) error {
 	return internal.GetLastCompletionResult(ctx, d...)
 }
@@ -493,6 +551,8 @@ func GetLastCompletionResult(ctx Context, d ...interface{}) error {
 //	}
 //
 // This is only supported when using ElasticSearch.
+//
+// no thrift exposure possible
 func UpsertSearchAttributes(ctx Context, attributes map[string]interface{}) error {
 	return internal.UpsertSearchAttributes(ctx, attributes)
 }

@@ -29,6 +29,7 @@ import (
 // NewThrift2ProtoAdapter creates an adapter for mapping calls from Thrift to Protobuf types.
 // This is intended to be used as compatibility layer for older client version to be able to
 // communicate with newer cadence server using GRPC.
+// TODO: inherently protocol-specific
 func NewThrift2ProtoAdapter(
 	domain apiv1.DomainAPIYARPCClient,
 	workflow apiv1.WorkflowAPIYARPCClient,

@@ -73,6 +73,7 @@ type WorkflowInterceptor interface {
 var _ WorkflowInterceptor = (*WorkflowInterceptorBase)(nil)
 
 // WorkflowInterceptorBase is a helper type that can simplify creation of WorkflowInterceptorChainFactories
+// transitive thrift exposure (methods)
 type WorkflowInterceptorBase struct {
 	Next WorkflowInterceptor
 }

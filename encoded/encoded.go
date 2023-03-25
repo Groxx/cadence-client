@@ -26,9 +26,11 @@ import "go.uber.org/cadence/internal"
 type (
 
 	// Value is used to encapsulate/extract encoded value from workflow/activity.
+	// no thrift exposure possible
 	Value = internal.Value
 
 	// Values is used to encapsulate/extract encoded one or more values from workflow/activity.
+	// no thrift exposure possible
 	Values = internal.Values
 
 	// DataConverter is used by the framework to serialize/deserialize input and output of activity/workflow
@@ -41,10 +43,12 @@ type (
 	// and pass that context to ExecuteActivity/ExecuteChildWorkflow calls.
 	// Cadence support using different DataConverters for different activity/childWorkflow in same workflow.
 	//   2. Activity/Workflow worker that run these activity/childWorkflow, through worker.Options.
+	// no thrift exposure possible
 	DataConverter = internal.DataConverter
 )
 
 // GetDefaultDataConverter return default data converter used by Cadence worker
+// no thrift exposure possible
 func GetDefaultDataConverter() DataConverter {
 	return internal.DefaultDataConverter
 }

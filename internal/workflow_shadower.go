@@ -50,6 +50,7 @@ const (
 
 type (
 	// ShadowOptions is used to configure workflow shadowing.
+	// no thrift exposure possible
 	ShadowOptions struct {
 		// Optional: Workflow visibility query for getting workflows that should be replayed
 		// if specified, WorkflowTypes, WorkflowStatus, WorkflowStartTimeFilter fields must not be specified.
@@ -94,16 +95,19 @@ type (
 	}
 
 	// TimeFilter represents a time range through the min and max timestamp
+	// no thrift exposure possible
 	TimeFilter struct {
 		MinTimestamp time.Time
 		MaxTimestamp time.Time
 	}
 
 	// ShadowMode is an enum for configuring if shadowing should continue after all workflows matches the WorkflowQuery have been replayed.
+	// no thrift exposure possible
 	ShadowMode int
 
 	// ShadowExitCondition configures when the workflow shadower should exit.
 	// If not specified shadower will exit after replaying all workflows satisfying the visibility query.
+	// no thrift exposure possible
 	ShadowExitCondition struct {
 		// Optional: Expiration interval for shadowing.
 		// Shadowing will exit when this interval has passed.

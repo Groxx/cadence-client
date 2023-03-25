@@ -54,6 +54,7 @@ func (CancelReason) private() {}
 // WithCancelReason can be passed to Client.CancelWorkflow to provide an explicit cancellation reason,
 // which will be recorded in the cancellation event in the workflow's history, similar to termination reasons.
 // This is purely informational, and does not influence Cadence behavior at all.
+// no thrift exposure possible
 func WithCancelReason(reason string) Option {
 	return CancelReason(reason)
 }
@@ -62,6 +63,7 @@ type (
 
 	// Client is the client for starting and getting information about a workflow executions as well as
 	// completing activities asynchronously.
+	// transitive thrift exposure
 	Client interface {
 		// StartWorkflow starts a workflow execution
 		// The user can use this to start using a function or workflow type name.
@@ -350,10 +352,12 @@ type (
 		//  - DomainNotActiveError
 		//  - ServiceBusyError
 		//  - EntityNotExistError
+		// no thrift exposure possible
 		RefreshWorkflowTasks(ctx context.Context, workflowID, runID string) error
 	}
 
 	// ClientOptions are optional parameters for Client creation.
+	// no thrift exposure possible
 	ClientOptions struct {
 		MetricsScope       tally.Scope
 		Identity           string
@@ -367,6 +371,7 @@ type (
 	// StartWorkflowOptions configuration parameters for starting a workflow execution.
 	// The current timeout resolution implementation is in seconds and uses math.Ceil(d.Seconds()) as the duration. But is
 	// subjected to change in the future.
+	// no thrift exposure possible
 	StartWorkflowOptions struct {
 		// ID - The business identifier of the workflow execution.
 		// Optional: defaulted to a uuid.
@@ -440,6 +445,7 @@ type (
 	// started time. Because of that, to check an activity has started or not, you cannot rely on history events. Instead,
 	// you can use CLI to describe the workflow to see the status of the activity:
 	//     cadence --do <domain> wf desc -w <wf-id>
+	// no thrift exposure possible
 	RetryPolicy struct {
 		// Backoff interval for the first retry. If coefficient is 1.0 then it is used for all retries.
 		// Required, no default value.

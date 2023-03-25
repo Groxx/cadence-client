@@ -24,12 +24,18 @@ import "go.uber.org/cadence/internal"
 
 type (
 	// HeaderReader is an interface to read information from cadence headers
+	//
+	// no thrift exposure possible
 	HeaderReader = internal.HeaderReader
 
 	// HeaderWriter is an interface to write information to cadence headers
+	//
+	// no thrift exposure possible
 	HeaderWriter = internal.HeaderWriter
 
 	// ContextPropagator is an interface that determines what information from
 	// context to pass along
+	//
+	// no thrift exposure possible
 	ContextPropagator = internal.ContextPropagator
 )

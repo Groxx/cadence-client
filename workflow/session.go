@@ -30,6 +30,8 @@ type (
 	// SessionID is a uuid generated when CreateSession() or RecreateSession()
 	// is called and can be used to uniquely identify a session.
 	// HostName specifies which host is executing the session
+	//
+	// no thrift exposure possible
 	SessionInfo = internal.SessionInfo
 
 	// SessionOptions specifies metadata for a session.
@@ -40,11 +42,15 @@ type (
 	// HeartbeatTimeout: optional, default 20s
 	//     Specifies the heartbeat timeout. If heartbeat is not received by server
 	//     within the timeout, the session will be declared as failed
+	//
+	// no thrift exposure possible
 	SessionOptions = internal.SessionOptions
 )
 
 // ErrSessionFailed is the error returned when user tries to execute an activity but the
 // session it belongs to has already failed
+//
+// no thrift exposure possible
 var ErrSessionFailed = internal.ErrSessionFailed
 
 // Note: Worker should be configured to process session. To do this, set the following
@@ -96,6 +102,8 @@ var ErrSessionFailed = internal.ErrSessionFailed
 //	       // Handle activity error
 //	   }
 //	   ... // execute more activities using sessionCtx
+//
+// no thrift exposure possible
 func CreateSession(ctx Context, sessionOptions *SessionOptions) (Context, error) {
 	return internal.CreateSession(ctx, sessionOptions)
 }
@@ -108,6 +116,8 @@ func CreateSession(ctx Context, sessionOptions *SessionOptions) (Context, error)
 // The main usage of RecreateSession is for long sessions that are splited into multiple runs. At the end of
 // one run, complete the current session, get recreateToken from sessionInfo by calling SessionInfo.GetRecreateToken()
 // and pass the token to the next run. In the new run, session can be recreated using that token.
+//
+// no thrift exposure possible
 func RecreateSession(ctx Context, recreateToken []byte, sessionOptions *SessionOptions) (Context, error) {
 	return internal.RecreateSession(ctx, recreateToken, sessionOptions)
 }
@@ -119,6 +129,8 @@ func RecreateSession(ctx Context, recreateToken []byte, sessionOptions *SessionO
 // After a session has completed, user can continue to use the context, but the activities will be scheduled
 // on the normal taskList (as user specified in ActivityOptions) and may be picked up by another worker since
 // it's not in a session.
+//
+// no thrift exposure possible
 func CompleteSession(ctx Context) {
 	internal.CompleteSession(ctx)
 }
@@ -128,6 +140,8 @@ func CompleteSession(ctx Context) {
 // session has failed, and created a new one on it), the most recent sessionInfo will be returned.
 //
 // This API will return nil if there's no sessionInfo in the context.
+//
+// no thrift exposure possible
 func GetSessionInfo(ctx Context) *SessionInfo {
 	return internal.GetSessionInfo(ctx)
 }

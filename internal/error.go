@@ -87,32 +87,44 @@ That decision task will be retried at a later time (with exponential backoff ret
 
 type (
 	// CustomError returned from workflow and activity implementations with reason and optional details.
+	//
+	// no thrift exposure possible
 	CustomError struct {
 		reason  string
 		details Values
 	}
 
 	// GenericError returned from workflow/workflow when the implementations return errors other than from NewCustomError() API.
+	//
+	// no thrift exposure possible
 	GenericError struct {
 		err string
 	}
 
 	// TimeoutError returned when activity or child workflow timed out.
+	//
+	// TODO: thrift exposure
 	TimeoutError struct {
 		timeoutType shared.TimeoutType
 		details     Values
 	}
 
 	// CanceledError returned when operation was canceled.
+	//
+	// no thrift exposure possible
 	CanceledError struct {
 		details Values
 	}
 
 	// TerminatedError returned when workflow was terminated.
+	//
+	// no thrift exposure possible
 	TerminatedError struct {
 	}
 
 	// PanicError contains information about panicked workflow/activity.
+	//
+	// no thrift exposure possible
 	PanicError struct {
 		value      interface{}
 		stackTrace string
@@ -120,12 +132,16 @@ type (
 
 	// workflowPanicError contains information about panicked workflow.
 	// Used to distinguish go panic in the workflow code from a PanicError returned from a workflow function.
+	//
+	// no thrift exposure possible
 	workflowPanicError struct {
 		value      interface{}
 		stackTrace string
 	}
 
 	// ContinueAsNewError contains information about how to continue the workflow as new.
+	//
+	// no thrift exposure possible
 	ContinueAsNewError struct {
 		wfn    interface{}
 		args   []interface{}
@@ -133,9 +149,13 @@ type (
 	}
 
 	// UnknownExternalWorkflowExecutionError can be returned when external workflow doesn't exist
+	//
+	// no thrift exposure possible
 	UnknownExternalWorkflowExecutionError struct{}
 
 	// ErrorDetailsValues is a type alias used hold error details objects.
+	//
+	// no thrift exposure possible
 	ErrorDetailsValues []interface{}
 )
 
@@ -176,6 +196,7 @@ func NewCustomError(reason string, details ...interface{}) *CustomError {
 
 // NewTimeoutError creates TimeoutError instance.
 // Use NewHeartbeatTimeoutError to create heartbeat TimeoutError
+// TODO: thrift exposure
 func NewTimeoutError(timeoutType shared.TimeoutType, details ...interface{}) *TimeoutError {
 	if len(details) == 1 {
 		if d, ok := details[0].(*EncodedValues); ok {
@@ -186,11 +207,13 @@ func NewTimeoutError(timeoutType shared.TimeoutType, details ...interface{}) *Ti
 }
 
 // NewHeartbeatTimeoutError creates TimeoutError instance
+// transitive thrift exposure
 func NewHeartbeatTimeoutError(details ...interface{}) *TimeoutError {
 	return NewTimeoutError(shared.TimeoutTypeHeartbeat, details...)
 }
 
 // NewCanceledError creates CanceledError instance
+// no thrift exposure possible
 func NewCanceledError(details ...interface{}) *CanceledError {
 	if len(details) == 1 {
 		if d, ok := details[0].(*EncodedValues); ok {
@@ -201,6 +224,7 @@ func NewCanceledError(details ...interface{}) *CanceledError {
 }
 
 // IsCanceledError return whether error in CanceledError
+// no thrift exposure possible
 func IsCanceledError(err error) bool {
 	_, ok := err.(*CanceledError)
 	return ok
@@ -218,6 +242,8 @@ func IsCanceledError(err error) bool {
 //		  ctx := WithWorkflowTaskList(ctx, "example-group")
 //	 wfn - workflow function. for new execution it can be different from the currently running.
 //	 args - arguments for the new workflow.
+//
+// no thrift exposure possible
 func NewContinueAsNewError(ctx Context, wfn interface{}, args ...interface{}) *ContinueAsNewError {
 	// Validate type and its arguments.
 	options := getWorkflowEnvOptions(ctx)
@@ -317,10 +343,12 @@ func (e *CanceledError) Details(d ...interface{}) error {
 	return e.details.Get(d...)
 }
 
+// no thrift exposure possible
 func newPanicError(value interface{}, stackTrace string) *PanicError {
 	return &PanicError{value: value, stackTrace: stackTrace}
 }
 
+// no thrift exposure possible
 func newWorkflowPanicError(value interface{}, stackTrace string) *workflowPanicError {
 	return &workflowPanicError{value: value, stackTrace: stackTrace}
 }
@@ -376,6 +404,7 @@ func (e *ContinueAsNewError) Header() *shared.Header {
 }
 
 // newTerminatedError creates NewTerminatedError instance
+// no thrift exposure possible
 func newTerminatedError() *TerminatedError {
 	return &TerminatedError{}
 }
@@ -386,6 +415,7 @@ func (e *TerminatedError) Error() string {
 }
 
 // newUnknownExternalWorkflowExecutionError creates UnknownExternalWorkflowExecutionError instance
+// no thrift exposure possible
 func newUnknownExternalWorkflowExecutionError() *UnknownExternalWorkflowExecutionError {
 	return &UnknownExternalWorkflowExecutionError{}
 }

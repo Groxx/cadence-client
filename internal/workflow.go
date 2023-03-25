@@ -69,6 +69,8 @@ type (
 	// normal channels (i.e. they will not be (de)serialized).  However, doing so is not generally recommended, as
 	// mixing the value types can increase the risk that you fail to read a value, causing values to be lost.  See
 	// Receive for more details about that behavior.
+	//
+	// no thrift exposure possible
 	Channel interface {
 		// Receive blocks until it receives a value, and then assigns the received value to the provided pointer.
 		// It returns false when the Channel is closed and all data has already been consumed from the Channel, in the
@@ -235,6 +237,8 @@ type (
 	// Finally, note that Select will not return until a condition's needs are met, like a Go selector - canceling the
 	// Context used to construct the Selector, or the Context used to Select, will not (directly) unblock a Select call.
 	// Read Select for more details.
+	//
+	// no thrift exposure possible
 	Selector interface {
 		// AddReceive waits until a value can be received from a channel.
 		// f is invoked when the channel has data or is closed.
@@ -320,6 +324,8 @@ type (
 	// WaitGroup must be used instead of native go sync.WaitGroup by
 	// workflow code.  Use workflow.NewWaitGroup(ctx) method to create
 	// a new WaitGroup instance
+	//
+	// no thrift exposure possible
 	WaitGroup interface {
 		Add(delta int)
 		Done()
@@ -327,6 +333,8 @@ type (
 	}
 
 	// Future represents the result of an asynchronous computation.
+	//
+	// no thrift exposure possible
 	Future interface {
 		// Get blocks until the future is ready.
 		// When ready it either returns the Future's contained error, or assigns the contained value to the output var.
@@ -364,6 +372,8 @@ type (
 
 	// Settable is used to set value or error on a future.
 	// See more: workflow.NewFuture(ctx).
+	//
+	// no thrift exposure possible
 	Settable interface {
 		Set(value interface{}, err error)
 		SetValue(value interface{})
@@ -372,6 +382,8 @@ type (
 	}
 
 	// ChildWorkflowFuture represents the result of a child workflow execution
+	//
+	// no thrift exposure possible
 	ChildWorkflowFuture interface {
 		Future
 		// GetChildWorkflowExecution returns a future that will be ready when child workflow execution started. You can
@@ -389,27 +401,37 @@ type (
 	}
 
 	// WorkflowType identifies a workflow type.
+	//
+	// no thrift exposure possible
 	WorkflowType struct {
 		Name string
 	}
 
 	// WorkflowExecution Details.
+	//
+	// no thrift exposure possible
 	WorkflowExecution struct {
 		ID    string
 		RunID string
 	}
 
 	// EncodedValue is type alias used to encapsulate/extract encoded result from workflow/activity.
+	//
+	// no thrift exposure possible
 	EncodedValue struct {
 		value         []byte
 		dataConverter DataConverter
 	}
 	// Version represents a change version. See GetVersion call.
+	//
+	// no thrift exposure possible
 	Version int
 
 	// ChildWorkflowOptions stores all child workflow specific parameters that will be stored inside of a Context.
 	// The current timeout resolution implementation is in seconds and uses math.Ceil(d.Seconds()) as the duration. But is
 	// subjected to change in the future.
+	//
+	// no thrift exposure possible
 	ChildWorkflowOptions struct {
 		// Domain of the child workflow.
 		// Optional: the current workflow (parent)'s domain will be used if this is not provided.
@@ -500,6 +522,8 @@ type (
 	// allow cleaning up the additional code complexity that they cause.
 	//
 	// deprecated
+	//
+	// no thrift exposure possible
 	Bugports struct {
 		// StartChildWorkflowsOnCanceledContext allows emulating older, buggy behavior that existed prior to v0.18.4.
 		//
@@ -535,6 +559,8 @@ type (
 )
 
 // RegisterWorkflowOptions consists of options for registering a workflow
+//
+// no thrift exposure possible
 type RegisterWorkflowOptions struct {
 	Name string
 	// Workflow type name is equal to function name instead of fully qualified name including function package.
@@ -557,6 +583,8 @@ type RegisterWorkflowOptions struct {
 // This method calls panic if workflowFunc doesn't comply with the expected format.
 // Deprecated: Global workflow registration methods are replaced by equivalent Worker instance methods.
 // This method is kept to maintain backward compatibility and should not be used.
+//
+// no thrift exposure possible
 func RegisterWorkflow(workflowFunc interface{}) {
 	RegisterWorkflowWithOptions(workflowFunc, RegisterWorkflowOptions{})
 }
@@ -582,6 +610,8 @@ func RegisterWorkflow(workflowFunc interface{}) {
 // type name twice. Use workflow.RegisterOptions.DisableAlreadyRegisteredCheck to allow multiple registrations.
 // Deprecated: Global workflow registration methods are replaced by equivalent Worker instance methods.
 // This method is kept to maintain backward compatibility and should not be used.
+//
+// no thrift exposure possible
 func RegisterWorkflowWithOptions(workflowFunc interface{}, opts RegisterWorkflowOptions) {
 	registry := getGlobalRegistry()
 	registry.RegisterWorkflowWithOptions(workflowFunc, opts)
@@ -589,6 +619,8 @@ func RegisterWorkflowWithOptions(workflowFunc interface{}, opts RegisterWorkflow
 
 // GetRegisteredWorkflowTypes returns the registered workflow function/alias names.
 // The public form is: workflow.GetRegisteredWorkflowTypes(...)
+//
+// no thrift exposure possible
 func GetRegisteredWorkflowTypes() []string {
 	registry := getGlobalRegistry()
 	return registry.GetRegisteredWorkflowTypes()
@@ -596,6 +628,8 @@ func GetRegisteredWorkflowTypes() []string {
 
 // Await blocks the calling thread until condition() returns true
 // Returns CanceledError if the ctx is canceled.
+//
+// no thrift exposure possible
 func Await(ctx Context, condition func() bool) error {
 	state := getState(ctx)
 	defer state.unblocked()
@@ -614,6 +648,8 @@ func Await(ctx Context, condition func() bool) error {
 }
 
 // NewChannel create new Channel instance
+//
+// no thrift exposure possible
 func NewChannel(ctx Context) Channel {
 	state := getState(ctx)
 	state.dispatcher.channelSequence++
@@ -622,12 +658,16 @@ func NewChannel(ctx Context) Channel {
 
 // NewNamedChannel create new Channel instance with a given human readable name.
 // Name appears in stack traces that are blocked on this channel.
+//
+// no thrift exposure possible
 func NewNamedChannel(ctx Context, name string) Channel {
 	env := getWorkflowEnvironment(ctx)
 	return &channelImpl{name: name, dataConverter: getDataConverterFromWorkflowContext(ctx), env: env}
 }
 
 // NewBufferedChannel create new buffered Channel instance
+//
+// no thrift exposure possible
 func NewBufferedChannel(ctx Context, size int) Channel {
 	env := getWorkflowEnvironment(ctx)
 	return &channelImpl{size: size, dataConverter: getDataConverterFromWorkflowContext(ctx), env: env}
@@ -635,12 +675,16 @@ func NewBufferedChannel(ctx Context, size int) Channel {
 
 // NewNamedBufferedChannel create new BufferedChannel instance with a given human readable name.
 // Name appears in stack traces that are blocked on this Channel.
+//
+// no thrift exposure possible
 func NewNamedBufferedChannel(ctx Context, name string, size int) Channel {
 	env := getWorkflowEnvironment(ctx)
 	return &channelImpl{name: name, size: size, dataConverter: getDataConverterFromWorkflowContext(ctx), env: env}
 }
 
 // NewSelector creates a new Selector instance.
+//
+// no thrift exposure possible
 func NewSelector(ctx Context) Selector {
 	state := getState(ctx)
 	state.dispatcher.selectorSequence++
@@ -649,17 +693,23 @@ func NewSelector(ctx Context) Selector {
 
 // NewNamedSelector creates a new Selector instance with a given human readable name.
 // Name appears in stack traces that are blocked on this Selector.
+//
+// no thrift exposure possible
 func NewNamedSelector(ctx Context, name string) Selector {
 	return &selectorImpl{name: name}
 }
 
 // NewWaitGroup creates a new WaitGroup instance.
+//
+// no thrift exposure possible
 func NewWaitGroup(ctx Context) WaitGroup {
 	f, s := NewFuture(ctx)
 	return &waitGroupImpl{future: f, settable: s}
 }
 
 // Go creates a new coroutine. It has similar semantic to goroutine in a context of the workflow.
+//
+// no thrift exposure possible
 func Go(ctx Context, f func(ctx Context)) {
 	state := getState(ctx)
 	state.dispatcher.newCoroutine(ctx, f)
@@ -668,12 +718,16 @@ func Go(ctx Context, f func(ctx Context)) {
 // GoNamed creates a new coroutine with a given human readable name.
 // It has similar semantic to goroutine in a context of the workflow.
 // Name appears in stack traces that are blocked on this Channel.
+//
+// no thrift exposure possible
 func GoNamed(ctx Context, name string, f func(ctx Context)) {
 	state := getState(ctx)
 	state.dispatcher.newNamedCoroutine(ctx, name, f)
 }
 
 // NewFuture creates a new future as well as associated Settable that is used to set its value.
+//
+// no thrift exposure possible
 func NewFuture(ctx Context) (Future, Settable) {
 	impl := &futureImpl{channel: NewChannel(ctx).(*channelImpl)}
 	return impl, impl
@@ -725,6 +779,8 @@ func (wc *workflowEnvironmentInterceptor) ExecuteWorkflow(ctx Context, workflowT
 // error CanceledError.
 //
 // ExecuteActivity returns Future with activity result or failure.
+//
+// no thrift exposure possible
 func ExecuteActivity(ctx Context, activity interface{}, args ...interface{}) Future {
 	i := getWorkflowInterceptor(ctx)
 	registry := getRegistryFromWorkflowContext(ctx)
@@ -840,6 +896,8 @@ func (wc *workflowEnvironmentInterceptor) ExecuteActivity(ctx Context, typeName 
 // with error CanceledError.
 //
 // ExecuteLocalActivity returns Future with local activity result or failure.
+//
+// no thrift exposure possible
 func ExecuteLocalActivity(ctx Context, activity interface{}, args ...interface{}) Future {
 	i := getWorkflowInterceptor(ctx)
 	env := getWorkflowEnvironment(ctx)
@@ -961,6 +1019,8 @@ func (wc *workflowEnvironmentInterceptor) scheduleLocalActivity(ctx Context, par
 // You can cancel the pending child workflow using context(workflow.WithCancel(ctx)) and that will fail the workflow with
 // error CanceledError.
 // ExecuteChildWorkflow returns ChildWorkflowFuture.
+//
+// no thrift exposure possible
 func ExecuteChildWorkflow(ctx Context, childWorkflow interface{}, args ...interface{}) ChildWorkflowFuture {
 	i := getWorkflowInterceptor(ctx)
 	env := getWorkflowEnvironment(ctx)
@@ -1091,6 +1151,8 @@ func getWorkflowHeader(ctx Context, ctxProps []ContextPropagator) *s.Header {
 }
 
 // WorkflowInfo information about currently executing workflow
+//
+// TODO: thrift exposure
 type WorkflowInfo struct {
 	WorkflowExecution                   WorkflowExecution
 	OriginalRunId                       string // The original runID before resetting. Using it instead of current runID can make workflow decision determinstic after reset
@@ -1174,6 +1236,8 @@ func (wc *workflowEnvironmentInterceptor) Now(ctx Context) time.Time {
 // is canceled, the returned Future become ready, and Future.Get() will return *CanceledError.
 // The current timer resolution implementation is in seconds and uses math.Ceil(d.Seconds()) as the duration. But is
 // subjected to change in the future.
+//
+// no thrift exposure possible
 func NewTimer(ctx Context, d time.Duration) Future {
 	i := getWorkflowInterceptor(ctx)
 	return i.NewTimer(ctx, d)
@@ -1363,6 +1427,8 @@ func signalExternalWorkflow(ctx Context, workflowID, runID, signalName string, a
 //	}
 //
 // This is only supported when using ElasticSearch.
+//
+// no thrift exposure possible
 func UpsertSearchAttributes(ctx Context, attributes map[string]interface{}) error {
 	i := getWorkflowInterceptor(ctx)
 	return i.UpsertSearchAttributes(ctx, attributes)
@@ -1378,6 +1444,8 @@ func (wc *workflowEnvironmentInterceptor) UpsertSearchAttributes(ctx Context, at
 // WithChildWorkflowOptions adds all workflow options to the context.
 // The current timeout resolution implementation is in seconds and uses math.Ceil(d.Seconds()) as the duration. But is
 // subjected to change in the future.
+//
+// no thrift exposure possible
 func WithChildWorkflowOptions(ctx Context, cwo ChildWorkflowOptions) Context {
 	ctx1 := setWorkflowEnvOptionsIfNotExist(ctx)
 	wfOptions := getWorkflowEnvOptions(ctx1)
@@ -1399,6 +1467,8 @@ func WithChildWorkflowOptions(ctx Context, cwo ChildWorkflowOptions) Context {
 }
 
 // WithWorkflowDomain adds a domain to the context.
+//
+// no thrift exposure possible
 func WithWorkflowDomain(ctx Context, name string) Context {
 	ctx1 := setWorkflowEnvOptionsIfNotExist(ctx)
 	getWorkflowEnvOptions(ctx1).domain = common.StringPtr(name)
@@ -1406,6 +1476,8 @@ func WithWorkflowDomain(ctx Context, name string) Context {
 }
 
 // WithWorkflowTaskList adds a task list to the context.
+//
+// no thrift exposure possible
 func WithWorkflowTaskList(ctx Context, name string) Context {
 	ctx1 := setWorkflowEnvOptionsIfNotExist(ctx)
 	getWorkflowEnvOptions(ctx1).taskListName = common.StringPtr(name)
@@ -1413,6 +1485,8 @@ func WithWorkflowTaskList(ctx Context, name string) Context {
 }
 
 // WithWorkflowID adds a workflowID to the context.
+//
+// no thrift exposure possible
 func WithWorkflowID(ctx Context, workflowID string) Context {
 	ctx1 := setWorkflowEnvOptionsIfNotExist(ctx)
 	getWorkflowEnvOptions(ctx1).workflowID = workflowID
@@ -1422,6 +1496,8 @@ func WithWorkflowID(ctx Context, workflowID string) Context {
 // WithExecutionStartToCloseTimeout adds a workflow execution timeout to the context.
 // The current timeout resolution implementation is in seconds and uses math.Ceil(d.Seconds()) as the duration. But is
 // subjected to change in the future.
+//
+// no thrift exposure possible
 func WithExecutionStartToCloseTimeout(ctx Context, d time.Duration) Context {
 	ctx1 := setWorkflowEnvOptionsIfNotExist(ctx)
 	getWorkflowEnvOptions(ctx1).executionStartToCloseTimeoutSeconds = common.Int32Ptr(common.Int32Ceil(d.Seconds()))
@@ -1431,6 +1507,8 @@ func WithExecutionStartToCloseTimeout(ctx Context, d time.Duration) Context {
 // WithWorkflowTaskStartToCloseTimeout adds a decision timeout to the context.
 // The current timeout resolution implementation is in seconds and uses math.Ceil(d.Seconds()) as the duration. But is
 // subjected to change in the future.
+//
+// no thrift exposure possible
 func WithWorkflowTaskStartToCloseTimeout(ctx Context, d time.Duration) Context {
 	ctx1 := setWorkflowEnvOptionsIfNotExist(ctx)
 	getWorkflowEnvOptions(ctx1).taskStartToCloseTimeoutSeconds = common.Int32Ptr(common.Int32Ceil(d.Seconds()))
@@ -1438,6 +1516,8 @@ func WithWorkflowTaskStartToCloseTimeout(ctx Context, d time.Duration) Context {
 }
 
 // WithDataConverter adds DataConverter to the context.
+//
+// no thrift exposure possible
 func WithDataConverter(ctx Context, dc DataConverter) Context {
 	if dc == nil {
 		panic("data converter is nil for WithDataConverter")
@@ -1448,6 +1528,8 @@ func WithDataConverter(ctx Context, dc DataConverter) Context {
 }
 
 // withContextPropagators adds ContextPropagators to the context.
+//
+// no thrift exposure possible
 func withContextPropagators(ctx Context, contextPropagators []ContextPropagator) Context {
 	ctx1 := setWorkflowEnvOptionsIfNotExist(ctx)
 	getWorkflowEnvOptions(ctx1).contextPropagators = contextPropagators
@@ -1455,6 +1537,8 @@ func withContextPropagators(ctx Context, contextPropagators []ContextPropagator)
 }
 
 // GetSignalChannel returns channel corresponding to the signal name.
+//
+// no thrift exposure possible
 func GetSignalChannel(ctx Context, signalName string) Channel {
 	i := getWorkflowInterceptor(ctx)
 	return i.GetSignalChannel(ctx, signalName)
@@ -1523,6 +1607,8 @@ func (b EncodedValue) HasValue() bool {
 //	} else {
 //	       ....
 //	}
+//
+// no thrift exposure possible
 func SideEffect(ctx Context, f func(ctx Context) interface{}) Value {
 	i := getWorkflowInterceptor(ctx)
 	return i.SideEffect(ctx, f)
@@ -1562,6 +1648,8 @@ func (wc *workflowEnvironmentInterceptor) SideEffect(ctx Context, f func(ctx Con
 // value as it was returning during the non-replay run.
 //
 // One good use case of MutableSideEffect() is to access dynamically changing config without breaking determinism.
+//
+// no thrift exposure possible
 func MutableSideEffect(ctx Context, id string, f func(ctx Context) interface{}, equals func(a, b interface{}) bool) Value {
 	i := getWorkflowInterceptor(ctx)
 	return i.MutableSideEffect(ctx, id, f, equals)
@@ -1575,9 +1663,13 @@ func (wc *workflowEnvironmentInterceptor) MutableSideEffect(ctx Context, id stri
 }
 
 // DefaultVersion is a version returned by GetVersion for code that wasn't versioned before
+//
+// no thrift exposure possible
 const DefaultVersion Version = -1
 
 // CadenceChangeVersion is used as search attributes key to find workflows with specific change version.
+//
+// no thrift exposure possible
 const CadenceChangeVersion = "CadenceChangeVersion"
 
 // GetVersion is used to safely perform backwards incompatible changes to workflow definitions.
@@ -1645,10 +1737,14 @@ const CadenceChangeVersion = "CadenceChangeVersion"
 //	} else {
 //	  err = workflow.ExecuteActivity(ctx, qux, data).Get(ctx, nil)
 //	}
+//
+// no thrift exposure possible
 func GetVersion(ctx Context, changeID string, minSupported, maxSupported Version) Version {
 	i := getWorkflowInterceptor(ctx)
 	return i.GetVersion(ctx, changeID, minSupported, maxSupported)
 }
+
+// TODO: GetLatestVersion
 
 func (wc *workflowEnvironmentInterceptor) GetVersion(ctx Context, changeID string, minSupported, maxSupported Version) Version {
 	return wc.env.GetVersion(changeID, minSupported, maxSupported)
@@ -1693,6 +1789,8 @@ func (wc *workflowEnvironmentInterceptor) GetVersion(ctx Context, changeID strin
 //	  currentState = "done"
 //	  return nil
 //	}
+//
+// no thrift exposure possible
 func SetQueryHandler(ctx Context, queryType string, handler interface{}) error {
 	i := getWorkflowInterceptor(ctx)
 	return i.SetQueryHandler(ctx, queryType, handler)
@@ -1718,6 +1816,8 @@ func (wc *workflowEnvironmentInterceptor) SetQueryHandler(ctx Context, queryType
 // on the failure. If workflow don't want to be blocked on those failure, it should ignore those failure; if workflow do
 // want to make sure it proceed only when that action succeed then it should panic on that failure. Panic raised from a
 // workflow causes decision task to fail and cadence server will rescheduled later to retry.
+//
+// no thrift exposure possible
 func IsReplaying(ctx Context) bool {
 	i := getWorkflowInterceptor(ctx)
 	return i.IsReplaying(ctx)
@@ -1732,6 +1832,8 @@ func (wc *workflowEnvironmentInterceptor) IsReplaying(ctx Context) bool {
 // If a cron workflow wants to pass some data to next schedule, it can return any data and that data will become
 // available when next run starts.
 // This HasLastCompletionResult() checks if there is such data available passing down from previous successful run.
+//
+// no thrift exposure possible
 func HasLastCompletionResult(ctx Context) bool {
 	i := getWorkflowInterceptor(ctx)
 	return i.HasLastCompletionResult(ctx)
@@ -1747,6 +1849,8 @@ func (wc *workflowEnvironmentInterceptor) HasLastCompletionResult(ctx Context) b
 // If a cron workflow wants to pass some data to next schedule, it can return any data and that data will become
 // available when next run starts.
 // This GetLastCompletionResult() extract the data into expected data structure.
+//
+// no thrift exposure possible
 func GetLastCompletionResult(ctx Context, d ...interface{}) error {
 	i := getWorkflowInterceptor(ctx)
 	return i.GetLastCompletionResult(ctx, d...)
@@ -1765,6 +1869,8 @@ func (wc *workflowEnvironmentInterceptor) GetLastCompletionResult(ctx Context, d
 // WithActivityOptions adds all options to the copy of the context.
 // The current timeout resolution implementation is in seconds and uses math.Ceil(d.Seconds()) as the duration. But is
 // subjected to change in the future.
+//
+// no thrift exposure possible
 func WithActivityOptions(ctx Context, options ActivityOptions) Context {
 	ctx1 := setActivityParametersIfNotExist(ctx)
 	eap := getActivityOptions(ctx1)
@@ -1783,6 +1889,8 @@ func WithActivityOptions(ctx Context, options ActivityOptions) Context {
 // WithLocalActivityOptions adds local activity options to the copy of the context.
 // The current timeout resolution implementation is in seconds and uses math.Ceil(d.Seconds()) as the duration. But is
 // subjected to change in the future.
+//
+// no thrift exposure possible
 func WithLocalActivityOptions(ctx Context, options LocalActivityOptions) Context {
 	ctx1 := setLocalActivityParametersIfNotExist(ctx)
 	opts := getLocalActivityOptions(ctx1)
@@ -1793,6 +1901,8 @@ func WithLocalActivityOptions(ctx Context, options LocalActivityOptions) Context
 }
 
 // WithTaskList adds a task list to the copy of the context.
+//
+// no thrift exposure possible
 func WithTaskList(ctx Context, name string) Context {
 	ctx1 := setActivityParametersIfNotExist(ctx)
 	getActivityOptions(ctx1).TaskListName = name
@@ -1802,6 +1912,8 @@ func WithTaskList(ctx Context, name string) Context {
 // WithScheduleToCloseTimeout adds a timeout to the copy of the context.
 // The current timeout resolution implementation is in seconds and uses math.Ceil(d.Seconds()) as the duration. But is
 // subjected to change in the future.
+//
+// no thrift exposure possible
 func WithScheduleToCloseTimeout(ctx Context, d time.Duration) Context {
 	ctx1 := setActivityParametersIfNotExist(ctx)
 	getActivityOptions(ctx1).ScheduleToCloseTimeoutSeconds = common.Int32Ceil(d.Seconds())
@@ -1811,6 +1923,8 @@ func WithScheduleToCloseTimeout(ctx Context, d time.Duration) Context {
 // WithScheduleToStartTimeout adds a timeout to the copy of the context.
 // The current timeout resolution implementation is in seconds and uses math.Ceil(d.Seconds()) as the duration. But is
 // subjected to change in the future.
+//
+// no thrift exposure possible
 func WithScheduleToStartTimeout(ctx Context, d time.Duration) Context {
 	ctx1 := setActivityParametersIfNotExist(ctx)
 	getActivityOptions(ctx1).ScheduleToStartTimeoutSeconds = common.Int32Ceil(d.Seconds())
@@ -1820,6 +1934,8 @@ func WithScheduleToStartTimeout(ctx Context, d time.Duration) Context {
 // WithStartToCloseTimeout adds a timeout to the copy of the context.
 // The current timeout resolution implementation is in seconds and uses math.Ceil(d.Seconds()) as the duration. But is
 // subjected to change in the future.
+//
+// no thrift exposure possible
 func WithStartToCloseTimeout(ctx Context, d time.Duration) Context {
 	ctx1 := setActivityParametersIfNotExist(ctx)
 	getActivityOptions(ctx1).StartToCloseTimeoutSeconds = common.Int32Ceil(d.Seconds())
@@ -1829,6 +1945,8 @@ func WithStartToCloseTimeout(ctx Context, d time.Duration) Context {
 // WithHeartbeatTimeout adds a timeout to the copy of the context.
 // The current timeout resolution implementation is in seconds and uses math.Ceil(d.Seconds()) as the duration. But is
 // subjected to change in the future.
+//
+// no thrift exposure possible
 func WithHeartbeatTimeout(ctx Context, d time.Duration) Context {
 	ctx1 := setActivityParametersIfNotExist(ctx)
 	getActivityOptions(ctx1).HeartbeatTimeoutSeconds = common.Int32Ceil(d.Seconds())
@@ -1836,6 +1954,8 @@ func WithHeartbeatTimeout(ctx Context, d time.Duration) Context {
 }
 
 // WithWaitForCancellation adds wait for the cacellation to the copy of the context.
+//
+// no thrift exposure possible
 func WithWaitForCancellation(ctx Context, wait bool) Context {
 	ctx1 := setActivityParametersIfNotExist(ctx)
 	getActivityOptions(ctx1).WaitForCancellation = wait
@@ -1843,6 +1963,8 @@ func WithWaitForCancellation(ctx Context, wait bool) Context {
 }
 
 // WithRetryPolicy adds retry policy to the copy of the context
+//
+// no thrift exposure possible
 func WithRetryPolicy(ctx Context, retryPolicy RetryPolicy) Context {
 	ctx1 := setActivityParametersIfNotExist(ctx)
 	getActivityOptions(ctx1).RetryPolicy = convertRetryPolicy(&retryPolicy)

@@ -37,6 +37,7 @@ type (
 	// WorkerOptions is used to configure a worker instance.
 	// The current timeout resolution implementation is in seconds and uses math.Ceil(d.Seconds()) as the duration. But is
 	// subjected to change in the future.
+	// transitive thrift exposure
 	WorkerOptions struct {
 		// Optional: To set the maximum concurrent activity executions this worker can have.
 		// The zero value of this uses the default value.
@@ -225,6 +226,7 @@ type (
 
 		// Optional: Specifies factories used to instantiate workflow interceptor chain
 		// The chain is instantiated per each replay of a workflow execution
+		// transitive thrift exposure
 		WorkflowInterceptorChainFactories []WorkflowInterceptorFactory
 
 		// Optional: Sets ContextPropagators that allows users to control the context information passed through a workflow
@@ -263,6 +265,7 @@ type (
 
 // NonDeterministicWorkflowPolicy is an enum for configuring how client's decision task handler deals with
 // mismatched history events (presumably arising from non-deterministic workflow definitions).
+// no thrift exposure possible
 type NonDeterministicWorkflowPolicy int
 
 const (
@@ -288,6 +291,7 @@ const (
 //	identifies group of workflow and activity implementations that are hosted by a single worker process.
 //
 // options 	-  configure any worker specific options like logger, metrics, identity.
+// transitive thrift exposure
 func NewWorker(
 	service workflowserviceclient.Interface,
 	domain string,
@@ -302,6 +306,7 @@ func NewWorker(
 // The logger is the only optional parameter. Defaults to the noop logger.
 // Deprecated: Global workflow replay methods are replaced by equivalent WorkflowReplayer instance methods.
 // This method is kept to maintain backward compatibility and should not be used.
+// transitive thrift exposure
 func ReplayWorkflowExecution(
 	ctx context.Context,
 	service workflowserviceclient.Interface,
@@ -318,6 +323,7 @@ func ReplayWorkflowExecution(
 // The logger is an optional parameter. Defaults to the noop logger.
 // Deprecated: Global workflow replay methods are replaced by equivalent WorkflowReplayer instance methods.
 // This method is kept to maintain backward compatibility and should not be used.
+// TODO: thrift arg/response, remove
 func ReplayWorkflowHistory(logger *zap.Logger, history *shared.History) error {
 	r := NewWorkflowReplayer()
 	return r.ReplayWorkflowHistory(logger, history)

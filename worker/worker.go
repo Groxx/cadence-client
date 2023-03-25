@@ -38,6 +38,7 @@ import (
 type (
 	// Worker hosts workflow and activity implementations.
 	// Use worker.New(...) to create an instance.
+	// no thrift exposure possible
 	Worker interface {
 		Registry
 
@@ -51,12 +52,14 @@ type (
 	}
 
 	// Registry exposes registration functions to consumers.
+	// no thrift exposure possible
 	Registry interface {
 		WorkflowRegistry
 		ActivityRegistry
 	}
 
 	// WorkflowRegistry exposes workflow registration functions to consumers.
+	// no thrift exposure possible
 	WorkflowRegistry interface {
 		// RegisterWorkflow - registers a workflow function with the worker.
 		// A workflow takes a workflow.Context and input and returns a (result, error) or just error.
@@ -68,6 +71,7 @@ type (
 		// Serialization of all primitive types, structures is supported ... except channels, functions, variadic, unsafe pointer.
 		// For global registration consider workflow.Register
 		// This method panics if workflowFunc doesn't comply with the expected format or tries to register the same workflow
+		// no thrift exposure possible
 		RegisterWorkflow(w interface{})
 
 		// RegisterWorkflowWithOptions registers the workflow function with options.
@@ -77,10 +81,12 @@ type (
 		//  worker.RegisterWorkflowWithOptions(sampleWorkflow, RegisterWorkflowOptions{Name: "foo"})
 		// This method panics if workflowFunc doesn't comply with the expected format or tries to register the same workflow
 		// type name twice. Use workflow.RegisterOptions.DisableAlreadyRegisteredCheck to allow multiple registrations.
+		// no thrift exposure possible
 		RegisterWorkflowWithOptions(w interface{}, options workflow.RegisterOptions)
 	}
 
 	// ActivityRegistry exposes activity registration functions to consumers.
+	// no thrift exposure possible
 	ActivityRegistry interface {
 		// RegisterActivity - register an activity function or a pointer to a structure with the worker.
 		// An activity function takes a context and input and returns a (result, error) or just error.
@@ -111,6 +117,7 @@ type (
 		// This method panics if activityFunc doesn't comply with the expected format or an activity with the same
 		// type name is registered more than once.
 		// For global registration consider activity.Register
+		// no thrift exposure possible
 		RegisterActivity(a interface{})
 
 		// RegisterActivityWithOptions registers the activity function or struct pointer with options.
@@ -129,6 +136,7 @@ type (
 		// The other use of options is to disable duplicated activity registration check
 		// which might be useful for integration tests.
 		// worker.RegisterActivityWithOptions(barActivity, RegisterActivityOptions{DisableAlreadyRegisteredCheck: true})
+		// no thrift exposure possible
 		RegisterActivityWithOptions(a interface{}, options activity.RegisterOptions)
 	}
 
@@ -139,6 +147,7 @@ type (
 	// Use this class to create unit tests that check if workflow changes are backwards compatible.
 	// It is important to maintain backwards compatibility through use of workflow.GetVersion
 	// to ensure that new deployments are not going to break open workflows.
+	// transitive thrift exposure
 	WorkflowReplayer interface {
 		WorkflowRegistry
 		ActivityRegistry
@@ -146,6 +155,7 @@ type (
 		// ReplayWorkflowHistory executes a single decision task for the given json history file.
 		// Use for testing the backwards compatibility of code changes and troubleshooting workflows in a debugger.
 		// The logger is an optional parameter. Defaults to the noop logger.
+		// TODO: thrift exposure
 		ReplayWorkflowHistory(logger *zap.Logger, history *shared.History) error
 
 		// ReplayWorkflowHistoryFromJSONFile executes a single decision task for the json history file downloaded from the cli.
@@ -155,6 +165,7 @@ type (
 		// The logger is an optional parameter. Defaults to the noop logger.
 		//
 		// Deprecated: prefer ReplayWorkflowHistoryFromJSON
+		// no thrift exposure possible
 		ReplayWorkflowHistoryFromJSONFile(logger *zap.Logger, jsonfileName string) error
 
 		// ReplayPartialWorkflowHistoryFromJSONFile executes a single decision task for the json history file upto provided
@@ -165,11 +176,13 @@ type (
 		// The logger is an optional parameter. Defaults to the noop logger.
 		//
 		// Deprecated: prefer ReplayPartialWorkflowHistoryFromJSON
+		// no thrift exposure possible
 		ReplayPartialWorkflowHistoryFromJSONFile(logger *zap.Logger, jsonfileName string, lastEventID int64) error
 
 		// ReplayWorkflowExecution loads a workflow execution history from the Cadence service and executes a single decision task for it.
 		// Use for testing the backwards compatibility of code changes and troubleshooting workflows in a debugger.
 		// The logger is the only optional parameter. Defaults to the noop logger.
+		// TODO: thrift exposure, remove
 		ReplayWorkflowExecution(ctx context.Context, service workflowserviceclient.Interface, logger *zap.Logger, domain string, execution workflow.Execution) error
 
 		// ReplayWorkflowHistoryFromJSON executes a single decision task for the json history file downloaded from the cli.
@@ -191,6 +204,7 @@ type (
 	}
 
 	// WorkflowShadower retrieves and replays workflow history from Cadence service to determine if there's any nondeterministic changes in the workflow definition
+	// no thrift exposure possible
 	WorkflowShadower interface {
 		WorkflowRegistry
 
@@ -198,26 +212,34 @@ type (
 	}
 
 	// Options is used to configure a worker instance.
+	// transitive thrift exposure
 	Options = internal.WorkerOptions
 
 	// ShadowOptions is used to configure a WorkflowShadower.
+	// no thrift exposure possible
 	ShadowOptions = internal.ShadowOptions
 	// ShadowMode is an enum for configuring if shadowing should continue after all workflows matches the WorkflowQuery have been replayed.
+	// no thrift exposure possible
 	ShadowMode = internal.ShadowMode
 	// TimeFilter represents a time range through the min and max timestamp
+	// no thrift exposure possible
 	TimeFilter = internal.TimeFilter
 	// ShadowExitCondition configures when the workflow shadower should exit.
 	// If not specified shadower will exit after replaying all workflows satisfying the visibility query.
+	// no thrift exposure possible
 	ShadowExitCondition = internal.ShadowExitCondition
 
 	// ReplayOptions is used to configure the replay decision task worker.
+	// transitive thrift exposure
 	ReplayOptions = internal.ReplayOptions
 
 	// NonDeterministicWorkflowPolicy is an enum for configuring how client's decision task handler deals with
 	// mismatched history events (presumably arising from non-deterministic workflow definitions).
+	// no thrift exposure possible
 	NonDeterministicWorkflowPolicy = internal.NonDeterministicWorkflowPolicy
 
 	// AuthorizationProvider is the interface that contains the method to get the auth token
+	// no thrift exposure possible
 	AuthorizationProvider = auth.AuthorizationProvider
 )
 
@@ -228,17 +250,20 @@ const (
 	// It is chosen as default for backward compatibility reasons because it preserves the old behavior
 	// for handling non-determinism that we had before NonDeterministicWorkflowPolicy type was added to
 	// allow more configurability.
+	// no thrift exposure possible
 	NonDeterministicWorkflowPolicyBlockWorkflow = internal.NonDeterministicWorkflowPolicyBlockWorkflow
 	// NonDeterministicWorkflowPolicyFailWorkflow behaves exactly the same as Ignore, up until the very
 	// end of processing a decision task.
 	// Whereas default does *NOT* reply anything back to the server, fail workflow replies back with a request
 	// to fail the workflow execution.
+	// no thrift exposure possible
 	NonDeterministicWorkflowPolicyFailWorkflow = internal.NonDeterministicWorkflowPolicyFailWorkflow
 )
 
 const (
 	// ShadowModeNormal is the default mode for workflow shadowing.
 	// Shadowing will complete after all workflows matches WorkflowQuery have been replayed.
+	// no thrift exposure possible
 	ShadowModeNormal = internal.ShadowModeNormal
 	// ShadowModeContinuous mode will start a new round of shadowing
 	// after all workflows matches WorkflowQuery have been replayed.
@@ -246,6 +271,7 @@ const (
 	// currently this wait period is not configurable.
 	// Shadowing will complete only when ExitCondition is met.
 	// ExitCondition must be specified when using this mode
+	// no thrift exposure possible
 	ShadowModeContinuous = internal.ShadowModeContinuous
 )
 
@@ -257,6 +283,8 @@ const (
 //	           identifies group of workflow and activity implementations that are
 //	           hosted by a single worker process
 //	options  - configure any worker specific options like logger, metrics, identity
+//
+// transitive thrift exposure
 func New(
 	service workflowserviceclient.Interface,
 	domain string,
@@ -267,12 +295,14 @@ func New(
 }
 
 // NewWorkflowReplayer creates a WorkflowReplayer instance.
+// transitive thrift exposure
 func NewWorkflowReplayer() WorkflowReplayer {
 	return internal.NewWorkflowReplayer()
 }
 
 // NewWorkflowReplayerWithOptions creates an instance of the WorkflowReplayer
 // with provided replay worker options
+// transitive thrift exposure
 func NewWorkflowReplayerWithOptions(
 	options ReplayOptions,
 ) WorkflowReplayer {
@@ -280,6 +310,7 @@ func NewWorkflowReplayerWithOptions(
 }
 
 // NewWorkflowShadower creates a WorkflowShadower instance.
+// transitive thrift exposure
 func NewWorkflowShadower(
 	service workflowserviceclient.Interface,
 	domain string,
@@ -293,6 +324,7 @@ func NewWorkflowShadower(
 // EnableVerboseLogging enable or disable verbose logging of internal Cadence library components.
 // Most customers don't need this feature, unless advised by the Cadence team member.
 // Also there is no guarantee that this API is not going to change.
+// no thrift exposure possible
 func EnableVerboseLogging(enable bool) {
 	internal.EnableVerboseLogging(enable)
 }
@@ -300,6 +332,8 @@ func EnableVerboseLogging(enable bool) {
 // ReplayWorkflowHistory executes a single decision task for the given json history file.
 // Use for testing the backwards compatibility of code changes and troubleshooting workflows in a debugger.
 // The logger is an optional parameter. Defaults to the noop logger.
+//
+// TODO: thrift exposure
 func ReplayWorkflowHistory(logger *zap.Logger, history *shared.History) error {
 	return internal.ReplayWorkflowHistory(logger, history)
 }
@@ -309,6 +343,8 @@ func ReplayWorkflowHistory(logger *zap.Logger, history *shared.History) error {
 // See https://github.com/uber/cadence/blob/master/tools/cli/README.md for full documentation
 // Use for testing the backwards compatibility of code changes and troubleshooting workflows in a debugger.
 // The logger is an optional parameter. Defaults to the noop logger.
+//
+// no thrift exposure possible
 func ReplayWorkflowHistoryFromJSONFile(logger *zap.Logger, jsonfileName string) error {
 	return internal.ReplayWorkflowHistoryFromJSONFile(logger, jsonfileName)
 }
@@ -319,6 +355,8 @@ func ReplayWorkflowHistoryFromJSONFile(logger *zap.Logger, jsonfileName string) 
 // See https://github.com/uber/cadence/blob/master/tools/cli/README.md for full documentation
 // Use for testing the backwards compatibility of code changes and troubleshooting workflows in a debugger.
 // The logger is an optional parameter. Defaults to the noop logger.
+//
+// no thrift exposure possible
 func ReplayPartialWorkflowHistoryFromJSONFile(logger *zap.Logger, jsonfileName string, lastEventID int64) error {
 	return internal.ReplayPartialWorkflowHistoryFromJSONFile(logger, jsonfileName, lastEventID)
 }
@@ -326,6 +364,8 @@ func ReplayPartialWorkflowHistoryFromJSONFile(logger *zap.Logger, jsonfileName s
 // ReplayWorkflowExecution loads a workflow execution history from the Cadence service and executes a single decision task for it.
 // Use for testing the backwards compatibility of code changes and troubleshooting workflows in a debugger.
 // The logger is the only optional parameter. Defaults to the noop logger.
+//
+// TODO: thrift exposure
 func ReplayWorkflowExecution(ctx context.Context, service workflowserviceclient.Interface, logger *zap.Logger, domain string, execution workflow.Execution) error {
 	return internal.ReplayWorkflowExecution(ctx, service, logger, domain, execution)
 }
@@ -337,6 +377,7 @@ func ReplayWorkflowExecution(ctx context.Context, service workflowserviceclient.
 // is it consumes more memory as it rely on caching workflow execution's running state on the worker. The cache is shared
 // between workers running within same process. This must be called before any worker is started. If not called, the
 // default size of 10K (might change in future) will be used.
+// no thrift exposure possible
 func SetStickyWorkflowCacheSize(cacheSize int) {
 	internal.SetStickyWorkflowCacheSize(cacheSize)
 }
@@ -347,11 +388,13 @@ func SetStickyWorkflowCacheSize(cacheSize int) {
 // mark the binary as bad, the workflow will be reset to that point -- which means workflow will forget all progress generated
 // by the binary.
 // On another hand, once the binary is marked as bad, the bad binary cannot poll decision and make any progress any more.
+// no thrift exposure possible
 func SetBinaryChecksum(checksum string) {
 	internal.SetBinaryChecksum(checksum)
 }
 
 // NewAdminJwtAuthorizationProvider creates a JwtAuthorizationProvider instance.
+// no thrift exposure possible
 func NewAdminJwtAuthorizationProvider(privateKey []byte) AuthorizationProvider {
 	return internal.NewAdminJwtAuthorizationProvider(privateKey)
 }

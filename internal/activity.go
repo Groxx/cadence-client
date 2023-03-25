@@ -35,11 +35,15 @@ import (
 
 type (
 	// ActivityType identifies a activity type.
+	//
+	// no thrift exposure possible
 	ActivityType struct {
 		Name string
 	}
 
 	// ActivityInfo contains information about currently executing activity.
+	//
+	// no thrift exposure possible
 	ActivityInfo struct {
 		TaskToken          []byte
 		WorkflowType       *WorkflowType
@@ -56,6 +60,8 @@ type (
 	}
 
 	// RegisterActivityOptions consists of options for registering an activity
+	//
+	// no thrift exposure possible
 	RegisterActivityOptions struct {
 		// When an activity is a function the name is an actual activity type name.
 		// When an activity is part of a structure then each member of the structure becomes an activity with
@@ -75,6 +81,8 @@ type (
 	// ActivityOptions stores all activity-specific parameters that will be stored inside of a context.
 	// The current timeout resolution implementation is in seconds and uses math.Ceil(d.Seconds()) as the duration. But is
 	// subjected to change in the future.
+	//
+	// no thrift exposure possible
 	ActivityOptions struct {
 		// TaskList that the activity needs to be scheduled on.
 		// optional: The default task list with the same name as the workflow task list.
@@ -120,6 +128,7 @@ type (
 	}
 
 	// LocalActivityOptions stores local activity specific parameters that will be stored inside of a context.
+	// no thrift exposure possible
 	LocalActivityOptions struct {
 		// ScheduleToCloseTimeout - The end to end timeout for the local activity.
 		// This field is required.

@@ -30,18 +30,26 @@ import (
 // API boundaries.
 //
 // Context's methods may be called by multiple goroutines simultaneously.
+//
+// no thrift exposure possible
 type Context = internal.Context
 
 // ErrCanceled is the error returned by Context.Err when the context is canceled.
+//
+// no thrift exposure possible
 var ErrCanceled = internal.ErrCanceled
 
 // ErrDeadlineExceeded is the error returned by Context.Err when the context's
 // deadline passes.
+//
+// no thrift exposure possible
 var ErrDeadlineExceeded = internal.ErrDeadlineExceeded
 
 // A CancelFunc tells an operation to abandon its work.
 // A CancelFunc does not wait for the work to stop.
 // After the first call, subsequent calls to a CancelFunc do nothing.
+//
+// no thrift exposure possible
 type CancelFunc = internal.CancelFunc
 
 // WithCancel returns a copy of parent with a new Done channel. The returned
@@ -50,6 +58,8 @@ type CancelFunc = internal.CancelFunc
 //
 // Canceling this context releases resources associated with it, so code should
 // call cancel as soon as the operations running in this Context complete.
+//
+// no thrift exposure possible
 func WithCancel(parent Context) (ctx Context, cancel CancelFunc) {
 	return internal.WithCancel(parent)
 }
@@ -59,6 +69,8 @@ func WithCancel(parent Context) (ctx Context, cancel CancelFunc) {
 //
 // Use context Values only for request-scoped data that transits processes and
 // APIs, not for passing optional parameters to functions.
+//
+// no thrift exposure possible
 func WithValue(parent Context, key interface{}, val interface{}) Context {
 	return internal.WithValue(parent, key, val)
 }
@@ -73,6 +85,8 @@ func WithValue(parent Context, key interface{}, val interface{}) Context {
 //	  workflow.ExecuteActivity(disconnectedCtx, handleCancellationActivity).Get(disconnectedCtx, nil)
 //	  return err // workflow return CanceledError
 //	}
+//
+// no thrift exposure possible
 func NewDisconnectedContext(parent Context) (ctx Context, cancel CancelFunc) {
 	return internal.NewDisconnectedContext(parent)
 }

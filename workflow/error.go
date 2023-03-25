@@ -86,22 +86,34 @@ if err != nil {
 type (
 	// GenericError is returned from activity or child workflow when an implementations return error
 	// other than from workflow.NewCustomError() API.
+	//
+	// no thrift exposure possible
 	GenericError = internal.GenericError
 
 	// TimeoutError returned when activity or child workflow timed out.
+	//
+	// transitive thrift exposure
 	TimeoutError = internal.TimeoutError
 
 	// TerminatedError returned when workflow was terminated.
+	//
+	// no thrift exposure possible
 	TerminatedError = internal.TerminatedError
 
 	// PanicError contains information about panicked workflow/activity.
+	//
+	// no thrift exposure possible
 	PanicError = internal.PanicError
 
 	// ContinueAsNewError can be returned by a workflow implementation function and indicates that
 	// the workflow should continue as new with the same WorkflowID, but new RunID and new history.
+	//
+	// no thrift exposure possible
 	ContinueAsNewError = internal.ContinueAsNewError
 
 	// UnknownExternalWorkflowExecutionError can be returned when external workflow doesn't exist
+	//
+	// no thrift exposure possible
 	UnknownExternalWorkflowExecutionError = internal.UnknownExternalWorkflowExecutionError
 )
 
@@ -117,6 +129,8 @@ type (
 //		  ctx := WithWorkflowTaskList(ctx, "example-group")
 //	 wfn - workflow function. for new execution it can be different from the currently running.
 //	 args - arguments for the new workflow.
+//
+// no thrift exposure possible
 func NewContinueAsNewError(ctx Context, wfn interface{}, args ...interface{}) *ContinueAsNewError {
 	return internal.NewContinueAsNewError(ctx, wfn, args...)
 }
@@ -125,6 +139,8 @@ func NewContinueAsNewError(ctx Context, wfn interface{}, args ...interface{}) *C
 // Use NewHeartbeatTimeoutError to create heartbeat TimeoutError
 // WARNING: This function is public only to support unit testing of workflows.
 // It shouldn't be used by application level code.
+//
+// transitive thrift exposure
 func NewTimeoutError(timeoutType shared.TimeoutType, details ...interface{}) *TimeoutError {
 	return internal.NewTimeoutError(timeoutType, details...)
 }
@@ -132,6 +148,8 @@ func NewTimeoutError(timeoutType shared.TimeoutType, details ...interface{}) *Ti
 // NewHeartbeatTimeoutError creates TimeoutError instance
 // WARNING: This function is public only to support unit testing of workflows.
 // It shouldn't be used by application level code.
+//
+// transitive thrift exposure
 func NewHeartbeatTimeoutError(details ...interface{}) *TimeoutError {
 	return internal.NewHeartbeatTimeoutError(details...)
 }

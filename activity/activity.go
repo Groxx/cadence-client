@@ -30,12 +30,16 @@ import (
 
 type (
 	// Type identifies an activity type.
+	// no thrift exposure possible
+	// TODO: flatten to just string
 	Type = internal.ActivityType
 
 	// Info contains information about a currently executing activity.
+	// no thrift exposure possible
 	Info = internal.ActivityInfo
 
 	// RegisterOptions consists of options for registering an activity
+	// no thrift exposure possible
 	RegisterOptions = internal.RegisterActivityOptions
 )
 
@@ -57,11 +61,13 @@ type (
 // If you cannot heartbeat and cannot tolerate this kind of delayed-activity-loss detection, consider emulating a long
 // activity via a signal channel instead: you can start a short-lived activity and wait for a "saved to external system"
 // signal, retrying as necessary, and then wait for an "external system finished" signal containing the final result.
+// no thrift exposure possible
 var ErrResultPending = internal.ErrActivityResultPending
 
 // Register - calls RegisterWithOptions with default registration options.
 // Deprecated: Global activity registration methods are replaced by equivalent Worker instance methods.
 // This method is kept to maintain backward compatibility and should not be used.
+// no thrift exposure possible
 func Register(activityFunc interface{}) {
 	internal.RegisterActivity(activityFunc)
 }
@@ -89,21 +95,25 @@ func Register(activityFunc interface{}) {
 // This method calls panic if activityFunc doesn't comply with the expected format.
 // Deprecated: Global activity registration methods are replaced by equivalent Worker instance methods.
 // This method is kept to maintain backward compatibility and should not be used.
+// no thrift exposure possible
 func RegisterWithOptions(activityFunc interface{}, opts RegisterOptions) {
 	internal.RegisterActivityWithOptions(activityFunc, opts)
 }
 
 // GetInfo returns information about currently executing activity.
+// no thrift exposure possible
 func GetInfo(ctx context.Context) Info {
 	return internal.GetActivityInfo(ctx)
 }
 
 // GetLogger returns a logger that can be used in activity
+// no thrift exposure possible
 func GetLogger(ctx context.Context) *zap.Logger {
 	return internal.GetActivityLogger(ctx)
 }
 
 // GetMetricsScope returns a metrics scope that can be used in activity
+// no thrift exposure possible
 func GetMetricsScope(ctx context.Context) tally.Scope {
 	return internal.GetActivityMetricsScope(ctx)
 }
@@ -114,11 +124,13 @@ func GetMetricsScope(ctx context.Context) tally.Scope {
 //
 // details - the details that you provided here can be seen in the workflow when it receives TimeoutError, you
 // can check error with TimeoutType()/Details().
+// no thrift exposure possible
 func RecordHeartbeat(ctx context.Context, details ...interface{}) {
 	internal.RecordActivityHeartbeat(ctx, details...)
 }
 
 // HasHeartbeatDetails checks if there is heartbeat details from last attempt.
+// no thrift exposure possible
 func HasHeartbeatDetails(ctx context.Context) bool {
 	return internal.HasHeartbeatDetails(ctx)
 }
@@ -129,6 +141,7 @@ func HasHeartbeatDetails(ctx context.Context) bool {
 // details reported by activity from the failed attempt, the details would be delivered along with the activity task for
 // retry attempt. Activity could extract the details by GetHeartbeatDetails() and resume from the progress.
 // See TestActivityEnvironment.SetHeartbeatDetails() for unit test support.
+// no thrift exposure possible
 func GetHeartbeatDetails(ctx context.Context, d ...interface{}) error {
 	return internal.GetHeartbeatDetails(ctx, d...)
 }
@@ -137,6 +150,7 @@ func GetHeartbeatDetails(ctx context.Context, d ...interface{}) error {
 // When the worker is stopping, it will close this channel and wait until the worker stop timeout finishes. After the timeout
 // hit, the worker will cancel the activity context and then exit. The timeout can be defined by worker option: WorkerStopTimeout.
 // Use this channel to handle activity graceful exit when the activity worker stops.
+// no thrift exposure possible
 func GetWorkerStopChannel(ctx context.Context) <-chan struct{} {
 	return internal.GetWorkerStopChannel(ctx)
 }

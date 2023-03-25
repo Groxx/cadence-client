@@ -17,3 +17,6 @@ High-level v2 plans:
 more detailed?
 - maybe I should target un-exposing internal things like search attrs, and then just copy/paste to make a non-aliased version?
   - feels like probably, as it keeps steps smaller and more verifiable.
+- no zero-valued iotas, all should have a validate func
+- definitely get rid of idls, use idl module
+- get rid of mocks

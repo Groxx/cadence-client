@@ -27,6 +27,7 @@ import (
 
 type (
 	// WorkflowTestSuite is the test suite to run unit tests for workflow/activity.
+	// TODO: contains `header` thrift type
 	WorkflowTestSuite = internal.WorkflowTestSuite
 
 	// TestWorkflowEnvironment is the environment that you use to test workflow

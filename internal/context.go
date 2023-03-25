@@ -37,6 +37,7 @@ const activeSpanContextKey contextKey = "activeSpanContextKey"
 // API boundaries.
 //
 // Context's methods may be called by multiple goroutines simultaneously.
+// no thrift exposure possible
 type Context interface {
 	// Deadline returns the time when work done on behalf of this context
 	// should be canceled.  Deadline returns ok==false when no deadline is

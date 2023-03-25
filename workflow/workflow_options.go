@@ -28,36 +28,50 @@ import (
 )
 
 // WithChildOptions adds all workflow options to the context.
+//
+// no thrift exposure possible
 func WithChildOptions(ctx Context, cwo ChildWorkflowOptions) Context {
 	return internal.WithChildWorkflowOptions(ctx, cwo)
 }
 
 // WithWorkflowDomain adds a domain to the context.
+//
+// no thrift exposure possible
 func WithWorkflowDomain(ctx Context, name string) Context {
 	return internal.WithWorkflowDomain(ctx, name)
 }
 
 // WithWorkflowTaskList adds a task list to the context.
+//
+// no thrift exposure possible
 func WithWorkflowTaskList(ctx Context, name string) Context {
 	return internal.WithWorkflowTaskList(ctx, name)
 }
 
 // WithWorkflowID adds a workflowID to the context.
+//
+// no thrift exposure possible
 func WithWorkflowID(ctx Context, workflowID string) Context {
 	return internal.WithWorkflowID(ctx, workflowID)
 }
 
 // WithExecutionStartToCloseTimeout adds a workflow execution timeout to the context.
+//
+// no thrift exposure possible
 func WithExecutionStartToCloseTimeout(ctx Context, d time.Duration) Context {
 	return internal.WithExecutionStartToCloseTimeout(ctx, d)
 }
 
 // WithWorkflowTaskStartToCloseTimeout adds a decision timeout to the context.
+//
+// no thrift exposure possible
 func WithWorkflowTaskStartToCloseTimeout(ctx Context, d time.Duration) Context {
 	return internal.WithWorkflowTaskStartToCloseTimeout(ctx, d)
 }
 
 // WithDataConverter adds DataConverter to the context.
+//
+// no thrift exposure possible
 func WithDataConverter(ctx Context, dc encoded.DataConverter) Context {
 	return internal.WithDataConverter(ctx, dc)
 }

@@ -27,17 +27,23 @@ import (
 )
 
 // HeaderWriter is an interface to write information to cadence headers
+//
+// no thrift exposure possible
 type HeaderWriter interface {
 	Set(string, []byte)
 }
 
 // HeaderReader is an interface to read information from cadence headers
+//
+// no thrift exposure possible
 type HeaderReader interface {
 	ForEachKey(handler func(string, []byte) error) error
 }
 
 // ContextPropagator is an interface that determines what information from
 // context to pass along
+//
+// no thrift exposure possible
 type ContextPropagator interface {
 	// Inject injects information from a Go Context into headers
 	Inject(context.Context, HeaderWriter) error
@@ -71,6 +77,8 @@ func (hr *headerReader) ForEachKey(handler func(string, []byte) error) error {
 }
 
 // NewHeaderReader returns a header reader interface
+//
+// no thrift exposure possible
 func NewHeaderReader(header *shared.Header) HeaderReader {
 	return &headerReader{header}
 }
@@ -87,6 +95,8 @@ func (hw *headerWriter) Set(key string, value []byte) {
 }
 
 // NewHeaderWriter returns a header writer interface
+//
+// no thrift exposure possible
 func NewHeaderWriter(header *shared.Header) HeaderWriter {
 	if header != nil && header.Fields == nil {
 		header.Fields = make(map[string][]byte)

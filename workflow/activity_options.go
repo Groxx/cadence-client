@@ -27,12 +27,18 @@ import (
 )
 
 // ActivityOptions stores all activity-specific invocation parameters that will be stored inside of a context.
+//
+// no thrift exposure possible
 type ActivityOptions = internal.ActivityOptions
 
 // LocalActivityOptions doc
+//
+// no thrift exposure possible
 type LocalActivityOptions = internal.LocalActivityOptions
 
 // RetryPolicy specify how to retry activity if error happens.
+//
+// no thrift exposure possible
 type RetryPolicy = internal.RetryPolicy
 
 // WithActivityOptions makes a copy of the context and adds the
@@ -40,6 +46,8 @@ type RetryPolicy = internal.RetryPolicy
 // it will be overwritten by the passed in value as a whole.
 // So specify all the values in the options as necessary, as values
 // in the existing context options will not be carried over.
+//
+// no thrift exposure possible
 func WithActivityOptions(ctx Context, options ActivityOptions) Context {
 	return internal.WithActivityOptions(ctx, options)
 }
@@ -47,6 +55,8 @@ func WithActivityOptions(ctx Context, options ActivityOptions) Context {
 // WithLocalActivityOptions makes a copy of the context and adds the
 // passed in options to the context. If a local activity options exists,
 // it will be overwritten by the passed in value.
+//
+// no thrift exposure possible
 func WithLocalActivityOptions(ctx Context, options LocalActivityOptions) Context {
 	return internal.WithLocalActivityOptions(ctx, options)
 }
@@ -54,6 +64,8 @@ func WithLocalActivityOptions(ctx Context, options LocalActivityOptions) Context
 // WithTaskList makes a copy of the current context and update the taskList
 // field in its activity options. An empty activity options will be created
 // if it does not exist in the original context.
+//
+// no thrift exposure possible
 func WithTaskList(ctx Context, name string) Context {
 	return internal.WithTaskList(ctx, name)
 }
@@ -64,6 +76,8 @@ func WithTaskList(ctx Context, name string) Context {
 //
 // Cadence time resolution is in seconds and the library uses math.Ceil(d.Seconds())
 // to calculate the final value. This is subject to change in the future.
+//
+// no thrift exposure possible
 func WithScheduleToCloseTimeout(ctx Context, d time.Duration) Context {
 	return internal.WithScheduleToCloseTimeout(ctx, d)
 }
@@ -74,6 +88,8 @@ func WithScheduleToCloseTimeout(ctx Context, d time.Duration) Context {
 //
 // Cadence time resolution is in seconds and the library uses math.Ceil(d.Seconds())
 // to calculate the final value. This is subject to change in the future.
+//
+// no thrift exposure possible
 func WithScheduleToStartTimeout(ctx Context, d time.Duration) Context {
 	return internal.WithScheduleToStartTimeout(ctx, d)
 }
@@ -84,6 +100,8 @@ func WithScheduleToStartTimeout(ctx Context, d time.Duration) Context {
 //
 // Cadence time resolution is in seconds and the library uses math.Ceil(d.Seconds())
 // to calculate the final value. This is subject to change in the future.
+//
+// no thrift exposure possible
 func WithStartToCloseTimeout(ctx Context, d time.Duration) Context {
 	return internal.WithStartToCloseTimeout(ctx, d)
 }
@@ -94,6 +112,8 @@ func WithStartToCloseTimeout(ctx Context, d time.Duration) Context {
 //
 // Cadence time resolution is in seconds and the library uses math.Ceil(d.Seconds())
 // to calculate the final value. This is subject to change in the future.
+//
+// no thrift exposure possible
 func WithHeartbeatTimeout(ctx Context, d time.Duration) Context {
 	return internal.WithHeartbeatTimeout(ctx, d)
 }
@@ -101,6 +121,8 @@ func WithHeartbeatTimeout(ctx Context, d time.Duration) Context {
 // WithWaitForCancellation makes a copy of the current context and update
 // the WaitForCancellation field in its activity options. An empty activity
 // options will be created if it does not exist in the original context.
+//
+// no thrift exposure possible
 func WithWaitForCancellation(ctx Context, wait bool) Context {
 	return internal.WithWaitForCancellation(ctx, wait)
 }
@@ -108,6 +130,8 @@ func WithWaitForCancellation(ctx Context, wait bool) Context {
 // WithRetryPolicy makes a copy of the current context and update
 // the RetryPolicy field in its activity options. An empty activity
 // options will be created if it does not exist in the original context.
+//
+// no thrift exposure possible
 func WithRetryPolicy(ctx Context, retryPolicy RetryPolicy) Context {
 	return internal.WithRetryPolicy(ctx, retryPolicy)
 }

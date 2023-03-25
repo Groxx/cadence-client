@@ -31,21 +31,31 @@ type (
 
 	// Channel must be used instead of native go channel by workflow code.
 	// Use workflow.NewChannel(ctx) method to create Channel instance.
+	//
+	// no thrift exposure possible
 	Channel = internal.Channel
 
 	// Selector must be used instead of native go select by workflow code.
 	// Use workflow.NewSelector(ctx) method to create a Selector instance.
+	//
+	// no thrift exposure possible
 	Selector = internal.Selector
 
 	// Future represents the result of an asynchronous computation.
+	//
+	// no thrift exposure possible
 	Future = internal.Future
 
 	// Settable is used to set value or error on a future.
 	// See more: workflow.NewFuture(ctx).
+	//
+	// no thrift exposure possible
 	Settable = internal.Settable
 
 	// WaitGroup is used to wait for a collection of
 	// coroutines to finish
+	//
+	// no thrift exposure possible
 	WaitGroup = internal.WaitGroup
 )
 
@@ -58,49 +68,67 @@ type (
 //	workflow.Await(ctx, func() bool {
 //	  return count == 5
 //	})
+//
+// no thrift exposure possible
 func Await(ctx Context, condition func() bool) error {
 	return internal.Await(ctx, condition)
 }
 
 // NewChannel create new Channel instance
+//
+// no thrift exposure possible
 func NewChannel(ctx Context) Channel {
 	return internal.NewChannel(ctx)
 }
 
 // NewNamedChannel create new Channel instance with a given human readable name.
 // Name appears in stack traces that are blocked on this channel.
+//
+// no thrift exposure possible
 func NewNamedChannel(ctx Context, name string) Channel {
 	return internal.NewNamedChannel(ctx, name)
 }
 
 // NewBufferedChannel create new buffered Channel instance
+//
+// no thrift exposure possible
 func NewBufferedChannel(ctx Context, size int) Channel {
 	return internal.NewBufferedChannel(ctx, size)
 }
 
 // NewNamedBufferedChannel create new BufferedChannel instance with a given human readable name.
 // Name appears in stack traces that are blocked on this Channel.
+//
+// no thrift exposure possible
 func NewNamedBufferedChannel(ctx Context, name string, size int) Channel {
 	return internal.NewNamedBufferedChannel(ctx, name, size)
 }
 
 // NewSelector creates a new Selector instance.
+//
+// no thrift exposure possible
 func NewSelector(ctx Context) Selector {
 	return internal.NewSelector(ctx)
 }
 
 // NewNamedSelector creates a new Selector instance with a given human readable name.
 // Name appears in stack traces that are blocked on this Selector.
+//
+// no thrift exposure possible
 func NewNamedSelector(ctx Context, name string) Selector {
 	return internal.NewNamedSelector(ctx, name)
 }
 
 // NewWaitGroup creates a new WaitGroup instance.
+//
+// no thrift exposure possible
 func NewWaitGroup(ctx Context) WaitGroup {
 	return internal.NewWaitGroup(ctx)
 }
 
 // Go creates a new coroutine. It has similar semantic to goroutine in a context of the workflow.
+//
+// no thrift exposure possible
 func Go(ctx Context, f func(ctx Context)) {
 	internal.Go(ctx, f)
 }
@@ -108,11 +136,15 @@ func Go(ctx Context, f func(ctx Context)) {
 // GoNamed creates a new coroutine with a given human readable name.
 // It has similar semantic to goroutine in a context of the workflow.
 // Name appears in stack traces that include this coroutine.
+//
+// no thrift exposure possible
 func GoNamed(ctx Context, name string, f func(ctx Context)) {
 	internal.GoNamed(ctx, name, f)
 }
 
 // NewFuture creates a new future as well as associated Settable that is used to set its value.
+//
+// no thrift exposure possible
 func NewFuture(ctx Context) (Future, Settable) {
 	return internal.NewFuture(ctx)
 }
@@ -140,6 +172,8 @@ func NewFuture(ctx Context) (Future, Settable) {
 //
 // Some actions may also advance `workflow.Now(ctx)` to a new time, e.g. local activities update the time when they
 // complete.  Generally speaking this occurs when there is a recorded event, as that event has a recorded time.
+//
+// no thrift exposure possible
 func Now(ctx Context) time.Time {
 	return internal.Now(ctx)
 }
@@ -150,6 +184,8 @@ func Now(ctx Context) time.Time {
 // is canceled, the returned Future become ready, and Future.Get() will return *CanceledError.
 // The current timer resolution implementation is in seconds and uses math.Ceil(d.Seconds()) as the duration. But is
 // subjected to change in the future.
+//
+// no thrift exposure possible
 func NewTimer(ctx Context, d time.Duration) Future {
 	return internal.NewTimer(ctx, d)
 }
@@ -162,6 +198,8 @@ func NewTimer(ctx Context, d time.Duration) Future {
 // 2) your workflow itself is canceled by external request.
 // The current timer resolution implementation is in seconds and uses math.Ceil(d.Seconds()) as the duration. But is
 // subjected to change in the future.
+//
+// no thrift exposure possible
 func Sleep(ctx Context, d time.Duration) (err error) {
 	return internal.Sleep(ctx, d)
 }

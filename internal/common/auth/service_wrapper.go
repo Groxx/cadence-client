@@ -37,6 +37,7 @@ type workflowServiceAuthWrapper struct {
 	authProvider AuthorizationProvider
 }
 
+// no thrift exposure possible
 type AuthorizationProvider interface {
 	// GetAuthToken provides the OAuth authorization token
 	// It's called before every request to Cadence server, and sets the token in the request header.
