@@ -34,6 +34,7 @@ import (
 	"go.uber.org/cadence/internal/common"
 	"go.uber.org/cadence/internal/common/backoff"
 	"go.uber.org/zap"
+	"golang.org/x/exp/maps"
 )
 
 var (
@@ -1180,11 +1181,7 @@ func (wInfo *WorkflowInfo) MemoKeys() []string {
 	if len(wInfo.memo.Fields) == 0 {
 		return nil
 	}
-	r := make([]string, 0, len(wInfo.memo.Fields))
-	for k := range wInfo.memo.Fields {
-		r = append(r, k)
-	}
-	return r
+	return maps.Keys(wInfo.memo.Fields)
 }
 
 func (wInfo *WorkflowInfo) GetMemo(dc DataConverter, key string, valuePtr interface{}) error {
@@ -1199,11 +1196,7 @@ func (wInfo *WorkflowInfo) SearchAttributeKeys() []string {
 	if len(wInfo.searchAttributes.IndexedFields) == 0 {
 		return nil
 	}
-	r := make([]string, 0, len(wInfo.searchAttributes.IndexedFields))
-	for k := range wInfo.searchAttributes.IndexedFields {
-		r = append(r, k)
-	}
-	return r
+	return maps.Keys(wInfo.searchAttributes.IndexedFields)
 }
 
 func (wInfo *WorkflowInfo) GetSearchAttribute(key string, valuePtr interface{}) error {

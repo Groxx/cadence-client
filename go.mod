@@ -21,6 +21,7 @@ require (
 	go.uber.org/thriftrw v1.25.0
 	go.uber.org/yarpc v1.55.0
 	go.uber.org/zap v1.13.0
+	golang.org/x/exp v0.0.0-20230321023759-10a507213a29
 	golang.org/x/net v0.1.0
 	golang.org/x/time v0.0.0-20170927054726-6dc17368e09b
 )
@@ -33,7 +34,6 @@ require (
 	github.com/gogo/googleapis v1.3.2 // indirect
 	github.com/gogo/status v1.1.0 // indirect
 	github.com/golang/protobuf v1.3.3 // indirect
-	github.com/google/go-cmp v0.5.8 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.2-0.20181231171920-c182affec369 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
