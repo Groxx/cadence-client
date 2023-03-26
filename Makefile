@@ -255,9 +255,9 @@ all: $(BUILD)/lint ## refresh codegen, lint, and ensure the dummy binary builds,
 .PHONY: clean
 clean:
 	$Q # intentionally not using $(BUILD) as that covers only a single version
-	rm -Rf .build .gen
+	rm -Rf .build
 	$Q # remove old things (no longer in use).  this can be removed "eventually", when we feel like they're unlikely to exist.
-	rm -Rf .bin
+	rm -Rf .bin .gen idls
 
 # broken up into multiple += so I can interleave comments.
 # this all becomes a single line of output.
