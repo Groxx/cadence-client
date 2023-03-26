@@ -25,7 +25,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	s "go.uber.org/cadence/.gen/go/shared"
+	s "github.com/uber/cadence-idl/go/thrift/shared"
 )
 
 func TestErrRetries(t *testing.T) {

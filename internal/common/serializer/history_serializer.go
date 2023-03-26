@@ -25,7 +25,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"go.uber.org/cadence/.gen/go/shared"
+
+	"github.com/uber/cadence-idl/go/thrift/shared"
 	"go.uber.org/thriftrw/protocol"
 	"go.uber.org/thriftrw/wire"
 )

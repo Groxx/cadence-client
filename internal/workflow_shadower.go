@@ -31,8 +31,8 @@ import (
 	"time"
 
 	"github.com/facebookgo/clock"
-	"go.uber.org/cadence/.gen/go/cadence/workflowserviceclient"
-	"go.uber.org/cadence/.gen/go/shadower"
+	"github.com/uber/cadence-idl/go/thrift/cadence/workflowserviceclient"
+	"github.com/uber/cadence-idl/go/thrift/shadower"
 	"go.uber.org/cadence/internal/common"
 	"go.uber.org/cadence/internal/common/util"
 	"go.uber.org/zap"

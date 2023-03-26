@@ -32,8 +32,8 @@ import (
 	"go.uber.org/cadence/internal/common/serializer"
 	"go.uber.org/yarpc"
 
-	"go.uber.org/cadence/.gen/go/cadence/workflowservicetest"
-	"go.uber.org/cadence/.gen/go/shared"
+	"github.com/uber/cadence-idl/go/thrift/cadence/workflowservicetest"
+	"github.com/uber/cadence-idl/go/thrift/shared"
 	"go.uber.org/cadence/internal/common"
 
 	"github.com/golang/mock/gomock"

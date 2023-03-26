@@ -27,8 +27,8 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	s "github.com/uber/cadence-idl/go/thrift/shared"
 	"go.uber.org/atomic"
-	s "go.uber.org/cadence/.gen/go/shared"
 	"go.uber.org/cadence/internal/common/autoscaler"
 	"go.uber.org/zap/zaptest"
 )

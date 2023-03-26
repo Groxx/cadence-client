@@ -27,8 +27,8 @@ import (
 	"math/rand"
 	"time"
 
+	"github.com/uber/cadence-idl/go/thrift/shared"
 	"go.uber.org/cadence"
-	"go.uber.org/cadence/.gen/go/shared"
 	"go.uber.org/cadence/client"
 	"go.uber.org/cadence/encoded"
 	"go.uber.org/cadence/internal"

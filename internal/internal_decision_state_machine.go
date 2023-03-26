@@ -23,7 +23,8 @@ package internal
 import (
 	"container/list"
 	"fmt"
-	s "go.uber.org/cadence/.gen/go/shared"
+
+	s "github.com/uber/cadence-idl/go/thrift/shared"
 	"go.uber.org/cadence/internal/common"
 	"go.uber.org/cadence/internal/common/util"
 )

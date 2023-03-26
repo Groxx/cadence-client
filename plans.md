@@ -19,4 +19,6 @@ more detailed?
   - feels like probably, as it keeps steps smaller and more verifiable.
 - no zero-valued iotas, all should have a validate func
 - definitely get rid of idls, use idl module
-- get rid of mocks
+- get rid of mocks, users need to make their own.  or at least we should provide it in a different library.
+- separate "encoded value" into "json-encoded", "unknown-encoded (dataconverter)", and maybe "from-context unknown-encoded"
+  - these have different calling requirements, they should be different types

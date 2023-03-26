@@ -53,10 +53,8 @@ endif
 $(BUILD)/lint: $(BUILD)/fmt $(BUILD)/dummy # lint will fail if fmt or dummy fails, so run them first
 $(BUILD)/dummy: $(BUILD)/fmt # do a build after fmt-ing
 $(BUILD)/fmt: $(BUILD)/copyright # formatting must occur only after all other go-file-modifications are done
-$(BUILD)/copyright: $(BUILD)/codegen # must add copyright to generated code
-$(BUILD)/codegen: $(BUILD)/thrift # thrift is currently the only codegen, but this way it's easier to extend
-$(BUILD)/thrift: $(BUILD)/go_mod_check
-$(BUILD)/go_mod_check: | $(BUILD) $(BIN)
+$(BUILD)/copyright: # placeholder
+
 
 # ====================================
 # helper vars
@@ -103,7 +101,6 @@ FRESH_ALL_SRC = $(shell \
 	find . \
 	\( \
 		-path './vendor/*' \
-		-o -path './idls/*' \
 		-o -path './$(BUILD)/*' \
 		-o -path './$(BIN)/*' \
 	\) \
@@ -136,12 +133,6 @@ endef
 $(BIN) $(BUILD):
 	$Q mkdir -p $@
 
-$(BIN)/thriftrw: internal/tools/go.mod
-	$(call go_build_tool,go.uber.org/thriftrw)
-
-$(BIN)/thriftrw-plugin-yarpc: internal/tools/go.mod
-	$(call go_build_tool,go.uber.org/yarpc/encoding/thrift/thriftrw-plugin-yarpc)
-
 $(BIN)/golint: internal/tools/go.mod
 	$(call go_build_tool,golang.org/x/lint/golint)
 
@@ -159,59 +150,8 @@ $(BIN)/copyright: internal/cmd/tools/copyright/licensegen.go
 	go build -mod=readonly -o $@ ./internal/cmd/tools/copyright/licensegen.go
 
 # dummy binary that ensures most/all packages build, without needing to wait for tests.
-$(BUILD)/dummy: $(ALL_SRC) $(BUILD)/go_mod_check
+$(BUILD)/dummy: $(ALL_SRC)
 	go build -mod=readonly -o $@ internal/cmd/dummy/dummy.go
-
-# ensures mod files are in sync for critical packages
-$(BUILD)/go_mod_check: go.mod internal/tools/go.mod
-	$Q # ensure both have the same apache/thrift replacement
-	$Q ./scripts/check-gomod-version.sh go.uber.org/thriftrw $(if $(verbose),-v)
-	$Q touch $@
-
-# ====================================
-# Codegen targets
-# ====================================
-
-# IDL submodule must be populated, or files will not exist -> prerequisites will be wrong -> build will fail.
-# Because it must exist before the makefile is parsed, this cannot be done automatically as part of a build.
-# Instead: call this func in targets that require the submodule to exist, so that target will not be built.
-#
-# THRIFT_FILES is just an easy identifier for "the submodule has files", others would work fine as well.
-define ensure_idl_submodule
-$(if $(wildcard THRIFT_FILES),,$(error idls/ submodule must exist, or build will fail.  Run `git submodule update --init` and try again))
-endef
-
-# codegen is done when thrift is done (it's just a naming-convenience, $(BUILD)/thrift would be fine too)
-$(BUILD)/codegen: $(BUILD)/thrift | $(BUILD)
-	$Q touch $@
-
-THRIFT_FILES := idls/thrift/cadence.thrift idls/thrift/shadower.thrift
-# book-keeping targets to build.  one per thrift file.
-# idls/thrift/thing.thrift -> .build/go_version/thing.thrift
-# the reverse is done in the recipe.
-THRIFT_GEN := $(subst idls/thrift,$(BUILD),$(THRIFT_FILES))
-
-# dummy targets to detect when the idls submodule does not exist, to provide a better error message
-$(THRIFT_FILES):
-	$(call ensure_idl_submodule)
-
-# thrift is done when all sub-thrifts are done.
-$(BUILD)/thrift: $(THRIFT_GEN)
-	$Q touch $@
-
-# how to generate each thrift book-keeping file.
-#
-# note that each generated file depends on ALL thrift files - this is necessary because they can import each other.
-# ideally this would --no-recurse like the server does, but currently that produces a new output file, and parallel
-# compiling appears to work fine.  seems likely it only risks rare flaky builds.
-$(THRIFT_GEN): $(THRIFT_FILES) $(BIN)/thriftrw $(BIN)/thriftrw-plugin-yarpc
-	$Q echo 'thriftrw for $(subst $(BUILD),idls/thrift,$@)...'
-	$Q $(BIN_PATH) $(BIN)/thriftrw \
-		--plugin=yarpc \
-		--pkg-prefix=$(PROJECT_ROOT)/.gen/go \
-		--out=.gen/go \
-		$(subst $(BUILD),idls/thrift,$@)
-	$Q touch $@
 
 # ====================================
 # other intermediates

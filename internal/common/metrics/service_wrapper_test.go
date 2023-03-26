@@ -31,10 +31,10 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
 	"github.com/uber-go/tally"
+	"github.com/uber/cadence-idl/go/thrift/cadence/workflowserviceclient"
+	"github.com/uber/cadence-idl/go/thrift/cadence/workflowservicetest"
+	s "github.com/uber/cadence-idl/go/thrift/shared"
 	"github.com/uber/tchannel-go/thrift"
-	"go.uber.org/cadence/.gen/go/cadence/workflowserviceclient"
-	"go.uber.org/cadence/.gen/go/cadence/workflowservicetest"
-	s "go.uber.org/cadence/.gen/go/shared"
 	"go.uber.org/yarpc"
 )
 

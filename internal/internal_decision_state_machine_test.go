@@ -24,7 +24,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	s "go.uber.org/cadence/.gen/go/shared"
+	s "github.com/uber/cadence-idl/go/thrift/shared"
 	"go.uber.org/cadence/internal/common"
 )
 

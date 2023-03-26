@@ -24,7 +24,7 @@ import (
 	"errors"
 
 	apiv1 "github.com/uber/cadence-idl/go/proto/api/v1"
-	"go.uber.org/cadence/.gen/go/shared"
+	"github.com/uber/cadence-idl/go/thrift/shared"
 	"go.uber.org/cadence/internal/common"
 	"go.uber.org/yarpc/encoding/protobuf"
 	"go.uber.org/yarpc/yarpcerrors"

@@ -26,8 +26,8 @@ import (
 	"context"
 	"io"
 
-	"go.uber.org/cadence/.gen/go/cadence/workflowserviceclient"
-	"go.uber.org/cadence/.gen/go/shared"
+	"github.com/uber/cadence-idl/go/thrift/cadence/workflowserviceclient"
+	"github.com/uber/cadence-idl/go/thrift/shared"
 	"go.uber.org/cadence/activity"
 	"go.uber.org/cadence/internal"
 	"go.uber.org/cadence/internal/common/auth"

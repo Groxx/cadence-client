@@ -26,7 +26,7 @@ import (
 	"sync"
 	"time"
 
-	s "go.uber.org/cadence/.gen/go/shared"
+	s "github.com/uber/cadence-idl/go/thrift/shared"
 )
 
 type (

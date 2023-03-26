@@ -3,12 +3,12 @@ set -eo pipefail
 
 [[ $2 = "-v" ]] && set -x;
 
-if ! gomod="$(go list -mod=readonly -f '{{ .Module }}' "$1")"; then
+if ! gomod="$(go list -m -mod=readonly "$1")"; then
     >&2 echo 'Error checking main go.mod.'
     exit 1
 fi
 
-if ! toolmod="$(go list -mod=readonly -modfile=internal/tools/go.mod -f '{{ .Module }}' "$1")"; then
+if ! toolmod="$(go list -m -mod=readonly -modfile=internal/tools/go.mod "$1")"; then
     >&2 echo 'Error checking tools go.mod, cd to internal/tools to modify it.'
     exit 1
 fi

@@ -27,8 +27,8 @@ import (
 	"github.com/opentracing/opentracing-go"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/uber/cadence-idl/go/thrift/shared"
 	jaeger_config "github.com/uber/jaeger-client-go/config"
-	"go.uber.org/cadence/.gen/go/shared"
 	"go.uber.org/zap"
 )
 

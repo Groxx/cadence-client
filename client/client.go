@@ -27,9 +27,9 @@ import (
 	"context"
 	"errors"
 
+	"github.com/uber/cadence-idl/go/thrift/cadence/workflowserviceclient"
+	s "github.com/uber/cadence-idl/go/thrift/shared"
 	"go.uber.org/cadence"
-	"go.uber.org/cadence/.gen/go/cadence/workflowserviceclient"
-	s "go.uber.org/cadence/.gen/go/shared"
 	"go.uber.org/cadence/encoded"
 	"go.uber.org/cadence/internal"
 	"go.uber.org/cadence/workflow"

@@ -22,8 +22,9 @@ package mocks
 
 import (
 	"context"
-	"go.uber.org/cadence/.gen/go/shared"
 	"testing"
+
+	"github.com/uber/cadence-idl/go/thrift/shared"
 
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"

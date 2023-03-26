@@ -22,7 +22,7 @@ package proto
 
 import (
 	apiv1 "github.com/uber/cadence-idl/go/proto/api/v1"
-	"go.uber.org/cadence/.gen/go/shared"
+	"github.com/uber/cadence-idl/go/thrift/shared"
 )
 
 func TaskListKind(t *shared.TaskListKind) apiv1.TaskListKind {

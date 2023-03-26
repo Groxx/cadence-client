@@ -22,13 +22,14 @@ package auth
 
 import (
 	"fmt"
-	"github.com/uber/tchannel-go/thrift"
-	"go.uber.org/cadence/.gen/go/shared"
 	"testing"
 	"time"
 
+	"github.com/uber/cadence-idl/go/thrift/shared"
+	"github.com/uber/tchannel-go/thrift"
+
 	"github.com/golang/mock/gomock"
-	"go.uber.org/cadence/.gen/go/cadence/workflowservicetest"
+	"github.com/uber/cadence-idl/go/thrift/cadence/workflowservicetest"
 
 	"github.com/stretchr/testify/suite"
 )

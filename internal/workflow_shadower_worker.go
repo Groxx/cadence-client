@@ -25,9 +25,9 @@ import (
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/pborman/uuid"
-	"go.uber.org/cadence/.gen/go/cadence/workflowserviceclient"
-	"go.uber.org/cadence/.gen/go/shadower"
-	"go.uber.org/cadence/.gen/go/shared"
+	"github.com/uber/cadence-idl/go/thrift/cadence/workflowserviceclient"
+	"github.com/uber/cadence-idl/go/thrift/shadower"
+	"github.com/uber/cadence-idl/go/thrift/shared"
 	"go.uber.org/cadence/internal/common"
 	"go.uber.org/cadence/internal/common/backoff"
 	"go.uber.org/zap"
