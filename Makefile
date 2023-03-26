@@ -149,9 +149,13 @@ $(BIN)/goveralls: internal/tools/go.mod
 $(BIN)/copyright: internal/cmd/tools/copyright/licensegen.go
 	go build -mod=readonly -o $@ ./internal/cmd/tools/copyright/licensegen.go
 
-# dummy binary that ensures most/all packages build, without needing to wait for tests.
+# relatively-quick build check of all packages, including all tests.
 $(BUILD)/dummy: $(ALL_SRC)
-	go build -mod=readonly -o $@ internal/cmd/dummy/dummy.go
+	$Q echo 'building all packages...'
+	$Q go build ./...
+	$Q echo 'building all tests...'
+	$Q go test ./... -exec true >/dev/null
+
 
 # ====================================
 # other intermediates
