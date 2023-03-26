@@ -49,3 +49,26 @@ func TestAtomicInt(t *testing.T) {
 	doneWg.Wait()  // wait for all goroutines to finish
 	assert.Equal(t, race, val.Load())
 }
+
+func TestAtomicBool(t *testing.T) {
+	// this should be sufficient for all atomics
+	var startWg sync.WaitGroup
+	var doneWg sync.WaitGroup
+	race := 100
+	startWg.Add(race + 1)
+	doneWg.Add(race)
+	val := NewAtomicBool(false)
+	for i := 0; i < race; i++ {
+		go (func() {
+			startWg.Done() // mark this goroutine as started
+			startWg.Wait() // wait for all goroutines to start
+
+			val.Store(i%2 == 1)
+			doneWg.Done()
+		})()
+	}
+
+	startWg.Done() // all goroutines created
+	doneWg.Wait()  // wait for all goroutines to finish
+	_ = val.Load() // in case it's necessary to defeat optimizations
+}
