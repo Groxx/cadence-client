@@ -344,12 +344,12 @@ func getMetricsScopeForLocalActivity(ts *metrics.TaggedScope, workflowType, loca
 	return ts.GetTaggedScope(tagWorkflowType, workflowType, tagLocalActivityType, localActivityType)
 }
 
-func getTimeoutTypeFromErrReason(reason string) (s.TimeoutType, error) {
+func getTimeoutTypeFromErrReason(reason string) (TimeoutType, error) {
 	timeoutTypeStr := reason[strings.Index(reason, " ")+1:]
 	var timeoutType s.TimeoutType
 	if err := timeoutType.UnmarshalText([]byte(timeoutTypeStr)); err != nil {
 		// this happens when the timeout error reason is constructed by an prior constructed by prior client version
 		return 0, err
 	}
-	return timeoutType, nil
+	return timeoutTypeFromThrift(timeoutType), nil
 }

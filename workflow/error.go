@@ -21,7 +21,6 @@
 package workflow
 
 import (
-	"github.com/uber/cadence-idl/go/thrift/shared"
 	"go.uber.org/cadence/internal"
 )
 
@@ -92,7 +91,7 @@ type (
 
 	// TimeoutError returned when activity or child workflow timed out.
 	//
-	// transitive thrift exposure
+	// no thrift exposure possible
 	TimeoutError = internal.TimeoutError
 
 	// TerminatedError returned when workflow was terminated.
@@ -115,6 +114,18 @@ type (
 	//
 	// no thrift exposure possible
 	UnknownExternalWorkflowExecutionError = internal.UnknownExternalWorkflowExecutionError
+
+	// TimeoutType defines what type of timeout occurred
+	//
+	// no thrift exposure possible
+	TimeoutType = internal.TimeoutType
+)
+
+const (
+	TimeoutTypeStartToClose    = internal.TimeoutTypeStartToClose
+	TimeoutTypeScheduleToStart = internal.TimeoutTypeScheduleToStart
+	TimeoutTypeScheduleToClose = internal.TimeoutTypeScheduleToClose
+	TimeoutTypeHeartbeat       = internal.TimeoutTypeHeartbeat
 )
 
 // NewContinueAsNewError creates ContinueAsNewError instance
@@ -140,8 +151,8 @@ func NewContinueAsNewError(ctx Context, wfn interface{}, args ...interface{}) *C
 // WARNING: This function is public only to support unit testing of workflows.
 // It shouldn't be used by application level code.
 //
-// TODO: thrift exposure
-func NewTimeoutError(timeoutType shared.TimeoutType, details ...interface{}) *TimeoutError {
+// no thrift exposure possible
+func NewTimeoutError(timeoutType TimeoutType, details ...interface{}) *TimeoutError {
 	return internal.NewTimeoutError(timeoutType, details...)
 }
 
@@ -149,7 +160,7 @@ func NewTimeoutError(timeoutType shared.TimeoutType, details ...interface{}) *Ti
 // WARNING: This function is public only to support unit testing of workflows.
 // It shouldn't be used by application level code.
 //
-// transitive thrift exposure
+// no thrift exposure possible
 func NewHeartbeatTimeoutError(details ...interface{}) *TimeoutError {
 	return internal.NewHeartbeatTimeoutError(details...)
 }

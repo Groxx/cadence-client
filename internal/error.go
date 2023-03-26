@@ -30,61 +30,62 @@ import (
 	"github.com/uber/cadence-idl/go/thrift/shared"
 )
 
+// TODO: I'm pretty sure these docs are not visible in go docs, but they seem useful.
 /*
 Below are the possible cases that activity could fail:
-1) *CustomError: (this should be the most common one)
-	If activity implementation returns *CustomError by using NewCustomError() API, workflow code would receive *CustomError.
-	The err would contain a Reason and Details. The reason is what activity specified to NewCustomError(), which workflow
-	code could check to determine what kind of error it was and take actions based on the reason. The details is encoded
-	[]byte which workflow code could extract strong typed data. Workflow code needs to know what the types of the encoded
-	details are before extracting them.
-2) *GenericError:
-	If activity implementation returns errors other than from NewCustomError() API, workflow code would receive *GenericError.
-	Use err.Error() to get the string representation of the actual error.
-3) *CanceledError:
-	If activity was canceled, workflow code will receive instance of *CanceledError. When activity cancels itself by
-	returning NewCancelError() it would supply optional details which could be extracted by workflow code.
-4) *TimeoutError:
-	If activity was timed out (several timeout types), workflow code will receive instance of *TimeoutError. The err contains
-	details about what type of timeout it was.
-5) *PanicError:
-	If activity code panic while executing, cadence activity worker will report it as activity failure to cadence server.
-	The cadence client library will present that failure as *PanicError to workflow code. The err contains a string
-	representation of the panic message and the call stack when panic was happen.
+ 1. *CustomError: (this should be the most common one)
+    If activity implementation returns *CustomError by using NewCustomError() API, workflow code would receive *CustomError.
+    The err would contain a Reason and Details. The reason is what activity specified to NewCustomError(), which workflow
+    code could check to determine what kind of error it was and take actions based on the reason. The details is encoded
+    []byte which workflow code could extract strong typed data. Workflow code needs to know what the types of the encoded
+    details are before extracting them.
+ 2. *GenericError:
+    If activity implementation returns errors other than from NewCustomError() API, workflow code would receive *GenericError.
+    Use err.Error() to get the string representation of the actual error.
+ 3. *CanceledError:
+    If activity was canceled, workflow code will receive instance of *CanceledError. When activity cancels itself by
+    returning NewCancelError() it would supply optional details which could be extracted by workflow code.
+ 4. *TimeoutError:
+    If activity was timed out (several timeout types), workflow code will receive instance of *TimeoutError. The err contains
+    details about what type of timeout it was.
+ 5. *PanicError:
+    If activity code panic while executing, cadence activity worker will report it as activity failure to cadence server.
+    The cadence client library will present that failure as *PanicError to workflow code. The err contains a string
+    representation of the panic message and the call stack when panic was happen.
 
 Workflow code could handle errors based on different types of error. Below is sample code of how error handling looks like.
 
 _, err := workflow.ExecuteActivity(ctx, MyActivity, ...).Get(nil)
-if err != nil {
-	switch err := err.(type) {
-	case *workflow.CustomError:
-		// handle activity errors (created via NewCustomError() API)
-		switch err.Reason() {
-		case CustomErrReasonA: // assume CustomErrReasonA is constant defined by activity implementation
-			var detailMsg string // assuming activity return error by NewCustomError(CustomErrReasonA, "string details")
-			err.Details(&detailMsg) // extract strong typed details (corresponding to CustomErrReasonA)
-			// handle CustomErrReasonA
-		case CustomErrReasonB:
-			// handle CustomErrReasonB
-		default:
-			// newer version of activity could return new errors that workflow was not aware of.
+
+	if err != nil {
+		switch err := err.(type) {
+		case *workflow.CustomError:
+			// handle activity errors (created via NewCustomError() API)
+			switch err.Reason() {
+			case CustomErrReasonA: // assume CustomErrReasonA is constant defined by activity implementation
+				var detailMsg string // assuming activity return error by NewCustomError(CustomErrReasonA, "string details")
+				err.Details(&detailMsg) // extract strong typed details (corresponding to CustomErrReasonA)
+				// handle CustomErrReasonA
+			case CustomErrReasonB:
+				// handle CustomErrReasonB
+			default:
+				// newer version of activity could return new errors that workflow was not aware of.
+			}
+		case *workflow.GenericError:
+			// handle generic error (errors created other than using NewCustomError() API)
+		case *workflow.CanceledError:
+			// handle cancellation
+		case *workflow.TimeoutError:
+			// handle timeout, could check timeout type by err.TimeoutType()
+		case *workflow.PanicError:
+			// handle panic
 		}
-	case *workflow.GenericError:
-		// handle generic error (errors created other than using NewCustomError() API)
-	case *workflow.CanceledError:
-		// handle cancellation
-	case *workflow.TimeoutError:
-		// handle timeout, could check timeout type by err.TimeoutType()
-	case *workflow.PanicError:
-		// handle panic
 	}
-}
 
 Errors from child workflow should be handled in a similar way, except that there should be no *PanicError from child workflow.
 When panic happen in workflow implementation code, cadence client library catches that panic and causing the decision timeout.
 That decision task will be retried at a later time (with exponential backoff retry intervals).
 */
-
 type (
 	// CustomError returned from workflow and activity implementations with reason and optional details.
 	//
@@ -103,9 +104,9 @@ type (
 
 	// TimeoutError returned when activity or child workflow timed out.
 	//
-	// TODO: thrift exposure
+	// no thrift exposure possible
 	TimeoutError struct {
-		timeoutType shared.TimeoutType
+		timeoutType TimeoutType
 		details     Values
 	}
 
@@ -159,6 +160,22 @@ type (
 	ErrorDetailsValues []interface{}
 )
 
+type TimeoutType int32
+
+func timeoutTypeFromThrift(t shared.TimeoutType) TimeoutType {
+	return TimeoutType(t)
+}
+func timeoutTypeToThrift(t TimeoutType) shared.TimeoutType {
+	return shared.TimeoutType(t)
+}
+
+const (
+	TimeoutTypeStartToClose    = TimeoutType(shared.TimeoutTypeStartToClose)
+	TimeoutTypeScheduleToStart = TimeoutType(shared.TimeoutTypeScheduleToStart)
+	TimeoutTypeScheduleToClose = TimeoutType(shared.TimeoutTypeScheduleToClose)
+	TimeoutTypeHeartbeat       = TimeoutType(shared.TimeoutTypeHeartbeat)
+)
+
 const (
 	errReasonPanic    = "cadenceInternal:Panic"
 	errReasonGeneric  = "cadenceInternal:Generic"
@@ -196,8 +213,8 @@ func NewCustomError(reason string, details ...interface{}) *CustomError {
 
 // NewTimeoutError creates TimeoutError instance.
 // Use NewHeartbeatTimeoutError to create heartbeat TimeoutError
-// TODO: thrift exposure
-func NewTimeoutError(timeoutType shared.TimeoutType, details ...interface{}) *TimeoutError {
+// no thrift exposure possible
+func NewTimeoutError(timeoutType TimeoutType, details ...interface{}) *TimeoutError {
 	if len(details) == 1 {
 		if d, ok := details[0].(*EncodedValues); ok {
 			return &TimeoutError{timeoutType: timeoutType, details: d}
@@ -207,12 +224,14 @@ func NewTimeoutError(timeoutType shared.TimeoutType, details ...interface{}) *Ti
 }
 
 // NewHeartbeatTimeoutError creates TimeoutError instance
-// transitive thrift exposure
+//
+// no thrift exposure possible
 func NewHeartbeatTimeoutError(details ...interface{}) *TimeoutError {
-	return NewTimeoutError(shared.TimeoutTypeHeartbeat, details...)
+	return NewTimeoutError(TimeoutTypeHeartbeat, details...)
 }
 
 // NewCanceledError creates CanceledError instance
+//
 // no thrift exposure possible
 func NewCanceledError(details ...interface{}) *CanceledError {
 	if len(details) == 1 {
@@ -308,7 +327,7 @@ func (e *TimeoutError) Error() string {
 }
 
 // TimeoutType return timeout type of this error
-func (e *TimeoutError) TimeoutType() shared.TimeoutType {
+func (e *TimeoutError) TimeoutType() TimeoutType {
 	return e.timeoutType
 }
 

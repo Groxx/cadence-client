@@ -1041,7 +1041,7 @@ func (weh *workflowExecutionEventHandlerImpl) handleActivityTaskTimedOut(event *
 		err = constructError(attributes.GetLastFailureReason(), attributes.LastFailureDetails, weh.GetDataConverter())
 	} else {
 		details := newEncodedValues(attributes.Details, weh.GetDataConverter())
-		err = NewTimeoutError(attributes.GetTimeoutType(), details)
+		err = NewTimeoutError(timeoutTypeFromThrift(attributes.GetTimeoutType()), details)
 	}
 	activity.handle(nil, err)
 	return nil
@@ -1275,7 +1275,7 @@ func (weh *workflowExecutionEventHandlerImpl) handleChildWorkflowExecutionTimedO
 	if childWorkflow.handled {
 		return nil
 	}
-	err := NewTimeoutError(attributes.GetTimeoutType())
+	err := NewTimeoutError(timeoutTypeFromThrift(attributes.GetTimeoutType()))
 	childWorkflow.handle(nil, err)
 
 	return nil

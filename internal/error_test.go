@@ -108,7 +108,7 @@ func Test_ActivityNotRegistered(t *testing.T) {
 }
 
 func Test_TimeoutError(t *testing.T) {
-	timeoutErr := NewTimeoutError(shared.TimeoutTypeScheduleToStart)
+	timeoutErr := NewTimeoutError(TimeoutTypeScheduleToStart)
 	require.False(t, timeoutErr.HasDetails())
 	var data string
 	require.Equal(t, ErrNoData, timeoutErr.Details(&data))

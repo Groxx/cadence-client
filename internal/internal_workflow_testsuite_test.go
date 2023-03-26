@@ -3004,7 +3004,7 @@ func (s *WorkflowTestSuiteUnitTest) Test_ActivityTimeoutWithDetails() {
 	count := 0
 	timeoutFn := func() error {
 		count++
-		return NewTimeoutError(shared.TimeoutTypeStartToClose, testErrorDetails1)
+		return NewTimeoutError(TimeoutTypeStartToClose, testErrorDetails1)
 	}
 
 	timeoutWf := func(ctx Context) error {

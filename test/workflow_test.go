@@ -27,7 +27,6 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/uber/cadence-idl/go/thrift/shared"
 	"go.uber.org/cadence"
 	"go.uber.org/cadence/client"
 	"go.uber.org/cadence/encoded"
@@ -98,12 +97,12 @@ func (w *Workflows) ActivityRetryOptionsChange(ctx workflow.Context) ([]string, 
 	return []string{"fail", "fail"}, nil
 }
 
-func (w *Workflows) ActivityRetryOnTimeout(ctx workflow.Context, timeoutType shared.TimeoutType) ([]string, error) {
+func (w *Workflows) ActivityRetryOnTimeout(ctx workflow.Context, timeoutType workflow.TimeoutType) ([]string, error) {
 	opts := w.defaultActivityOptionsWithRetry()
 	switch timeoutType {
-	case shared.TimeoutTypeScheduleToClose:
+	case workflow.TimeoutTypeScheduleToClose:
 		opts.ScheduleToCloseTimeout = time.Second
-	case shared.TimeoutTypeStartToClose:
+	case workflow.TimeoutTypeStartToClose:
 		opts.StartToCloseTimeout = time.Second
 	}
 
@@ -154,7 +153,7 @@ func (w *Workflows) ActivityRetryOnHBTimeout(ctx workflow.Context) ([]string, er
 		return nil, fmt.Errorf("activity failed with unexpected error: %v", err)
 	}
 
-	if terr.TimeoutType() != shared.TimeoutTypeHeartbeat {
+	if terr.TimeoutType() != workflow.TimeoutTypeHeartbeat {
 		return nil, fmt.Errorf("activity failed due to unexpected timeout %v", terr.TimeoutType())
 	}
 
