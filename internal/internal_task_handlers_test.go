@@ -1119,7 +1119,7 @@ func (t *TaskHandlersTestSuite) TestWorkflowTask_PageToken() {
 
 	historyIterator := &historyIteratorImpl{
 		iteratorFunc: func(nextToken []byte) (*s.History, []byte, error) {
-			return &s.History{nextEvents}, nil, nil
+			return &s.History{Events: nextEvents}, nil, nil
 		},
 	}
 	taskHandler := newWorkflowTaskHandler(testDomain, params, nil, t.registry)

@@ -2202,8 +2202,6 @@ func (s *WorkflowTestSuiteUnitTest) Test_Channel() {
 				})
 			}
 		}
-
-		return nil
 	}
 
 	env := s.NewTestWorkflowEnvironment()

@@ -36,10 +36,10 @@ import (
 	"github.com/robfig/cron"
 	"github.com/uber/cadence-idl/go/thrift/shared"
 	s "github.com/uber/cadence-idl/go/thrift/shared"
-	"go.uber.org/atomic"
 	"go.uber.org/cadence/internal/common"
 	"go.uber.org/cadence/internal/common/metrics"
 	"go.uber.org/cadence/internal/common/util"
+	"go.uber.org/cadence/internal/concurrent"
 	"go.uber.org/zap"
 )
 
@@ -150,7 +150,7 @@ type (
 		unblock      chan unblockFunc // used to notify coroutine that it should continue executing.
 		keptBlocked  bool             // true indicates that coroutine didn't make any progress since the last yield unblocking
 		closed       bool             // indicates that owning coroutine has finished execution
-		blocked      atomic.Bool
+		blocked      *concurrent.AtomicBool
 		panicError   *workflowPanicError // non nil if coroutine had unhandled panic
 	}
 
@@ -796,7 +796,7 @@ func (s *coroutineState) initialYield(stackDepth int, status string) {
 		f := <-s.unblock
 		keepBlocked = f(status, stackDepth+1)
 	}
-	s.blocked.Swap(false)
+	s.blocked.Store(false)
 }
 
 // yield indicates that coroutine cannot make progress and should sleep
@@ -892,6 +892,7 @@ func (d *dispatcherImpl) newState(name string) *coroutineState {
 		dispatcher:   d,
 		aboutToBlock: make(chan bool, 1),
 		unblock:      make(chan unblockFunc),
+		blocked:      concurrent.NewAtomicBool(false),
 	}
 	d.sequence++
 	d.coroutines = append(d.coroutines, c)

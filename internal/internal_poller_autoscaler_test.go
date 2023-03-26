@@ -28,8 +28,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	s "github.com/uber/cadence-idl/go/thrift/shared"
-	"go.uber.org/atomic"
 	"go.uber.org/cadence/internal/common/autoscaler"
+	"go.uber.org/cadence/internal/concurrent"
 	"go.uber.org/zap/zaptest"
 )
 
@@ -157,7 +157,7 @@ func Test_pollerAutoscaler(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			autoscalerEpoch := atomic.NewUint64(0)
+			autoscalerEpoch := concurrent.NewAtomicInt(0)
 			pollerScaler := newPollerScaler(
 				pollerAutoScalerOptions{
 					Enabled:           !tt.args.disabled,
@@ -196,7 +196,7 @@ func Test_pollerAutoscaler(t *testing.T) {
 			}
 
 			assert.Eventually(t, func() bool {
-				return autoscalerEpoch.Load() == uint64(tt.args.autoScalerEpoch)
+				return autoscalerEpoch.Load() == tt.args.autoScalerEpoch
 			}, tt.args.cooldownTime+20*time.Millisecond, 10*time.Millisecond)
 			pollerScaler.Stop()
 			res := pollerScaler.GetCurrent()
@@ -241,7 +241,7 @@ func Test_pollerUsageEstimator(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			estimator := &pollerUsageEstimator{atomicBits: atomic.NewUint64(0)}
+			estimator := &pollerUsageEstimator{atomicBits: concurrent.NewAtomicInt(0)}
 			pollChan := generateRandomPollResults(tt.args.noTaskPoll, tt.args.taskPoll, tt.args.unrelated)
 			wg := &sync.WaitGroup{}
 			for i := 0; i < tt.args.pollerCount; i++ {

@@ -96,7 +96,7 @@ type (
 		// eventHandler is changed to a atomic.Value as a temporally bug fix for local activity
 		// retry issue (github issue #915). Therefore, when accessing/modifying this field, the
 		// mutex should still be held.
-		eventHandler atomic.Value
+		eventHandler atomic.Value // protected from copies by the mutex's no-copy quality
 
 		isWorkflowCompleted bool
 		result              []byte

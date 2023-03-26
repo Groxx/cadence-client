@@ -23,12 +23,13 @@ package internal
 import (
 	"context"
 	"errors"
-	"github.com/marusama/semaphore/v2"
-	"go.uber.org/atomic"
-	"go.uber.org/cadence/internal/common/autoscaler"
-	"go.uber.org/zap"
 	"sync"
 	"time"
+
+	"github.com/marusama/semaphore/v2"
+	"go.uber.org/cadence/internal/common/autoscaler"
+	"go.uber.org/cadence/internal/concurrent"
+	"go.uber.org/zap"
 )
 
 // defaultPollerScalerCooldownInSeconds
@@ -62,7 +63,7 @@ type (
 		// This single atomic variable stores two variables:
 		// left 32 bits is noTaskCounts, right 32 bits is taskCounts.
 		// This avoids unnecessary usage of CompareAndSwap
-		atomicBits *atomic.Uint64
+		atomicBits *concurrent.AtomicInt
 	}
 
 	pollerAutoScalerOptions struct {
@@ -80,10 +81,10 @@ func newPollerScaler(
 	options pollerAutoScalerOptions,
 	logger *zap.Logger,
 	hooks ...func()) *pollerAutoScaler {
-	ctx, cancel := context.WithCancel(context.Background())
 	if !options.Enabled {
 		return nil
 	}
+	ctx, cancel := context.WithCancel(context.Background())
 
 	return &pollerAutoScaler{
 		isDryRun:             options.DryRun,
@@ -93,7 +94,7 @@ func newPollerScaler(
 		wg:                   &sync.WaitGroup{},
 		ctx:                  ctx,
 		cancel:               cancel,
-		pollerUsageEstimator: pollerUsageEstimator{atomicBits: atomic.NewUint64(0)},
+		pollerUsageEstimator: pollerUsageEstimator{atomicBits: concurrent.NewAtomicInt(0)},
 		recommender: autoscaler.NewLinearRecommender(
 			autoscaler.ResourceUnit(options.MinCount),
 			autoscaler.ResourceUnit(options.MaxCount),

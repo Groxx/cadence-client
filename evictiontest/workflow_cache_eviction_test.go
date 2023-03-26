@@ -38,9 +38,9 @@ import (
 	"github.com/stretchr/testify/suite"
 	"github.com/uber/cadence-idl/go/thrift/cadence/workflowservicetest"
 	m "github.com/uber/cadence-idl/go/thrift/shared"
-	"go.uber.org/atomic"
 	"go.uber.org/cadence/internal"
 	"go.uber.org/cadence/internal/common"
+	"go.uber.org/cadence/internal/concurrent"
 	"go.uber.org/cadence/worker"
 	"go.uber.org/yarpc"
 	"go.uber.org/zap/zaptest"
@@ -118,7 +118,7 @@ func (s *CacheEvictionSuite) TestResetStickyOnEviction() {
 		createTestEventDecisionTaskScheduled(2, &m.DecisionTaskScheduledEventAttributes{}),
 	}
 
-	var taskCounter atomic.Int32 // lambda variable to keep count
+	taskCounter := concurrent.NewAtomicInt(0) // lambda variable to keep count
 	// mock that manufactures unique decision tasks
 	mockPollForDecisionTask := func(
 		ctx context.Context,

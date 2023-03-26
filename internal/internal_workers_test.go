@@ -31,8 +31,8 @@ import (
 	"github.com/stretchr/testify/suite"
 	"github.com/uber/cadence-idl/go/thrift/cadence/workflowservicetest"
 	m "github.com/uber/cadence-idl/go/thrift/shared"
-	"go.uber.org/atomic"
 	"go.uber.org/cadence/internal/common"
+	"go.uber.org/cadence/internal/concurrent"
 	"go.uber.org/yarpc"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zaptest"
@@ -663,7 +663,7 @@ func (s *WorkersTestSuite) createLocalActivityMarkerDataForTest(activityID strin
 }
 
 func (s *WorkersTestSuite) TestLocallyDispatchedActivity() {
-	activityCalledCount := atomic.NewInt32(0) // must be accessed with atomics, worker uses goroutines to run activities
+	activityCalledCount := concurrent.NewAtomicInt(0) // must be accessed with atomics, worker uses goroutines to run activities
 	activitySleep := func(duration time.Duration) error {
 		time.Sleep(duration)
 		activityCalledCount.Add(1)
@@ -735,11 +735,11 @@ func (s *WorkersTestSuite) TestLocallyDispatchedActivity() {
 				TaskToken:                       []byte("test-token")}
 		return &m.RespondDecisionTaskCompletedResponse{ActivitiesToDispatchLocally: activitiesToDispatchLocally}, nil
 	}).Times(1)
-	isActivityResponseCompleted := atomic.NewBool(false)
+	isActivityResponseCompleted := concurrent.NewAtomicBool(false)
 	s.service.EXPECT().RespondActivityTaskCompleted(gomock.Any(), gomock.Any(), callOptions()...).DoAndReturn(func(ctx context.Context, request *m.RespondActivityTaskCompletedRequest, opts ...yarpc.CallOption,
 	) error {
 		defer close(doneCh)
-		isActivityResponseCompleted.Swap(true)
+		isActivityResponseCompleted.Store(true)
 		return nil
 	}).Times(1)
 
@@ -757,11 +757,11 @@ func (s *WorkersTestSuite) TestLocallyDispatchedActivity() {
 	startWorkerAndWait(s, worker, &doneCh)
 
 	s.True(isActivityResponseCompleted.Load())
-	s.Equal(int32(1), activityCalledCount.Load())
+	s.Equal(1, activityCalledCount.Load())
 }
 
 func (s *WorkersTestSuite) TestMultipleLocallyDispatchedActivity() {
-	activityCalledCount := atomic.NewInt32(0)
+	activityCalledCount := concurrent.NewAtomicInt(0)
 	activitySleep := func(duration time.Duration) error {
 		time.Sleep(duration)
 		activityCalledCount.Add(1)
@@ -770,7 +770,7 @@ func (s *WorkersTestSuite) TestMultipleLocallyDispatchedActivity() {
 
 	doneCh := make(chan struct{})
 
-	var activityCount int32 = 5
+	activityCount := 5
 	workflowFn := func(ctx Context, input []byte) error {
 		ao := ActivityOptions{
 			ScheduleToCloseTimeout: 1 * time.Second,
@@ -781,7 +781,7 @@ func (s *WorkersTestSuite) TestMultipleLocallyDispatchedActivity() {
 
 		// start all activities in parallel, and wait for them all to complete.
 		var all []Future
-		for i := 0; i < int(activityCount); i++ {
+		for i := 0; i < activityCount; i++ {
 			all = append(all, ExecuteActivity(ctx, activitySleep, 500*time.Millisecond))
 		}
 		for i, f := range all {
@@ -834,7 +834,7 @@ func (s *WorkersTestSuite) TestMultipleLocallyDispatchedActivity() {
 	s.service.EXPECT().PollForActivityTask(gomock.Any(), gomock.Any(), callOptions()...).Return(nil, nil).AnyTimes()
 	s.service.EXPECT().RespondDecisionTaskCompleted(gomock.Any(), gomock.Any(), callOptions()...).DoAndReturn(func(ctx context.Context, request *m.RespondDecisionTaskCompletedRequest, opts ...yarpc.CallOption,
 	) (success *m.RespondDecisionTaskCompletedResponse, err error) {
-		s.Equal(int(activityCount), len(request.Decisions))
+		s.Equal(activityCount, len(request.Decisions))
 		activitiesToDispatchLocally := make(map[string]*m.ActivityLocalDispatchInfo)
 		for _, d := range request.Decisions {
 			s.Equal(m.DecisionTypeScheduleActivityTask, d.GetDecisionType())
@@ -848,7 +848,7 @@ func (s *WorkersTestSuite) TestMultipleLocallyDispatchedActivity() {
 		}
 		return &m.RespondDecisionTaskCompletedResponse{ActivitiesToDispatchLocally: activitiesToDispatchLocally}, nil
 	}).Times(1)
-	activityResponseCompletedCount := atomic.NewInt32(0)
+	activityResponseCompletedCount := concurrent.NewAtomicInt(0)
 	s.service.EXPECT().RespondActivityTaskCompleted(gomock.Any(), gomock.Any(), callOptions()...).DoAndReturn(func(ctx context.Context, request *m.RespondActivityTaskCompletedRequest, opts ...yarpc.CallOption,
 	) error {
 		counted := activityResponseCompletedCount.Add(1)
