@@ -954,7 +954,7 @@ func (t *TaskHandlersTestSuite) TestGetWorkflowInfo() {
 	t.EqualValues(taskTimeout, result.TaskStartToCloseTimeoutSeconds)
 	t.EqualValues(workflowType, result.WorkflowType.Name)
 	t.EqualValues(testDomain, result.Domain)
-	t.EqualValues(retryPolicy, result.RetryPolicy)
+	t.EqualValues(fromThriftRetryPolicy(retryPolicy), result.RetryPolicy)
 }
 
 func (t *TaskHandlersTestSuite) TestConsistentQuery_InvalidQueryTask() {

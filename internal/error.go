@@ -169,6 +169,12 @@ func timeoutTypeToThrift(t TimeoutType) shared.TimeoutType {
 	return shared.TimeoutType(t)
 }
 
+// String returns a human-friendly string rather than the underlying integer, as the thrift type has done.
+// This is used in string comparisons for e.g. reason and must be maintained.
+func (t TimeoutType) String() string {
+	return timeoutTypeToThrift(t).String()
+}
+
 const (
 	TimeoutTypeStartToClose    = TimeoutType(shared.TimeoutTypeStartToClose)
 	TimeoutTypeScheduleToStart = TimeoutType(shared.TimeoutTypeScheduleToStart)

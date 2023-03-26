@@ -300,10 +300,11 @@ func constructError(reason string, details []byte, dataConverter DataConverter) 
 		timeoutType, err := getTimeoutTypeFromErrReason(reason)
 		if err != nil {
 			// prior client version uses details to indicate timeoutType
-			if err := details.Get(&timeoutType); err != nil {
+			var rawtype s.TimeoutType
+			if err := details.Get(&rawtype); err != nil {
 				panic(err)
 			}
-			return NewTimeoutError(timeoutType)
+			return NewTimeoutError(timeoutTypeFromThrift(rawtype))
 		}
 		return NewTimeoutError(timeoutType, details)
 	}
@@ -349,7 +350,7 @@ func getTimeoutTypeFromErrReason(reason string) (TimeoutType, error) {
 	var timeoutType s.TimeoutType
 	if err := timeoutType.UnmarshalText([]byte(timeoutTypeStr)); err != nil {
 		// this happens when the timeout error reason is constructed by an prior constructed by prior client version
-		return 0, err
+		return 0, fmt.Errorf("invalid json: %q, err: %w", timeoutTypeStr, err)
 	}
 	return timeoutTypeFromThrift(timeoutType), nil
 }

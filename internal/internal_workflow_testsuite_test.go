@@ -3032,7 +3032,7 @@ func (s *WorkflowTestSuiteUnitTest) Test_ActivityTimeoutWithDetails() {
 	s.Error(err)
 	timeoutErr, ok := err.(*TimeoutError)
 	s.True(ok)
-	s.Equal(shared.TimeoutTypeStartToClose, timeoutErr.TimeoutType())
+	s.Equal(TimeoutTypeStartToClose, timeoutErr.TimeoutType())
 	s.True(timeoutErr.HasDetails())
 	var details string
 	err = timeoutErr.Details(&details)
@@ -3047,7 +3047,7 @@ func (s *WorkflowTestSuiteUnitTest) Test_ActivityTimeoutWithDetails() {
 	s.Error(err)
 	timeoutErr, ok = err.(*TimeoutError)
 	s.True(ok)
-	s.Equal(shared.TimeoutTypeStartToClose, timeoutErr.TimeoutType())
+	s.Equal(TimeoutTypeStartToClose, timeoutErr.TimeoutType())
 	s.True(timeoutErr.HasDetails())
 	err = timeoutErr.Details(&details)
 	s.NoError(err)
@@ -3078,7 +3078,7 @@ func (s *WorkflowTestSuiteUnitTest) Test_ActivityDeadlineExceeded() {
 	s.Error(err)
 	timeoutErr, ok := err.(*TimeoutError)
 	s.True(ok)
-	s.Equal(shared.TimeoutTypeStartToClose, timeoutErr.TimeoutType())
+	s.Equal(TimeoutTypeStartToClose, timeoutErr.TimeoutType())
 	s.True(timeoutErr.HasDetails())
 	var details string
 	err = timeoutErr.Details(&details)

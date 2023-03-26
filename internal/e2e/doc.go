@@ -19,8 +19,11 @@
 // THE SOFTWARE.
 
 /*
-Package e2e contains end-to-end integration tests,
-i.e. currently anything that does not support `go test ./...`
-without running more processes, and possibly their helpers.
+Package e2e contains end-to-end integration tests, i.e. currently anything that
+does not support `go test ./...` without running more processes, and possibly
+their helpers.
+
+Currently this is controlled implicitly - anything that calls RequiresRunningCadence
+will be skipped, which occurs when trying to use the E2E setup newConfig func.
 */
 package e2e

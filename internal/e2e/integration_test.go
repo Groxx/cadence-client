@@ -69,6 +69,7 @@ const (
 )
 
 func TestIntegrationSuite(t *testing.T) {
+
 	suite.Run(t, new(IntegrationTestSuite))
 }
 
@@ -95,7 +96,7 @@ func waitForTCP(timeout time.Duration, addr string) error {
 
 func (ts *IntegrationTestSuite) SetupSuite() {
 	ts.Assertions = require.New(ts.T())
-	ts.config = newConfig()
+	ts.config = newConfig(ts.T())
 	ts.activities = newActivities()
 	ts.workflows = &Workflows{}
 	ts.Nil(waitForTCP(time.Minute, ts.config.ServiceAddr))

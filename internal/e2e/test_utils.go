@@ -26,6 +26,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"testing"
 
 	"go.uber.org/yarpc"
 	"go.uber.org/yarpc/transport/grpc"
@@ -36,6 +37,15 @@ import (
 	"go.uber.org/cadence/compatibility"
 	"go.uber.org/cadence/workflow"
 )
+
+// primary env var that must be set to run any integration test
+const E2ETestServiceAddr = "CADENCE_FRONTEND_ADDR"
+
+func RequiresRunningCadence(t *testing.T) {
+	if os.Getenv(E2ETestServiceAddr) == "" {
+		t.Skip("skipping integration test, CADENCE_FRONTEND_ADDR is not set")
+	}
+}
 
 type (
 	// Config contains the integration test configuration
@@ -51,10 +61,14 @@ type (
 	contextKey string
 )
 
-func newConfig() Config {
+// newConfig creates a new E2E config, initializing from env vars.
+// this requires a running Cadence instance and CADENCE_FRONTEND_ADDR env var to be set,
+// pointing to the frontend, generally "127.0.0.1:7933"
+func newConfig(t *testing.T) Config {
+	RequiresRunningCadence(t)
 	cfg := Config{
 		ServiceName:       "cadence-frontend",
-		ServiceAddr:       "127.0.0.1:7933",
+		ServiceAddr:       os.Getenv(E2ETestServiceAddr),
 		EnableGrpcAdapter: false,
 		IsStickyOff:       true,
 	}

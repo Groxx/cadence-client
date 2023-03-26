@@ -1151,6 +1151,9 @@ func (env *testWorkflowEnvironmentImpl) executeActivityWithRetryForTest(
 }
 
 func fromThriftRetryPolicy(p *shared.RetryPolicy) *RetryPolicy {
+	if p == nil {
+		return nil
+	}
 	return &RetryPolicy{
 		InitialInterval:          time.Second * time.Duration(p.GetInitialIntervalInSeconds()),
 		BackoffCoefficient:       p.GetBackoffCoefficient(),

@@ -881,7 +881,7 @@ func (s *workflowRunSuite) TestExecuteWorkflow_NoDup_TimedOut() {
 	s.NotNil(err)
 	_, ok := err.(*TimeoutError)
 	s.True(ok)
-	s.Equal(timeType, err.(*TimeoutError).TimeoutType())
+	s.Equal(timeoutTypeFromThrift(timeType), err.(*TimeoutError).TimeoutType())
 	s.Equal(time.Minute, decodedResult)
 }
 

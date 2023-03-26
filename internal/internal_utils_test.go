@@ -123,7 +123,7 @@ func TestGetErrorDetails_TimeoutError(t *testing.T) {
 	val := newEncodedValues(details, dc).(*EncodedValues)
 	timeoutErr1 := NewTimeoutError(TimeoutTypeScheduleToStart, val)
 	reason, data := getErrorDetails(timeoutErr1, dc)
-	require.Equal(t, fmt.Sprintf("%v %v", errReasonTimeout, s.TimeoutTypeScheduleToStart), reason)
+	require.Equal(t, fmt.Sprintf("%s %s", errReasonTimeout, s.TimeoutTypeScheduleToStart.String()), reason)
 	require.Equal(t, val.values, data)
 
 	timeoutErr2 := NewTimeoutError(TimeoutTypeHeartbeat, testErrorDetails4)
@@ -157,6 +157,6 @@ func TestConstructError_TimeoutError(t *testing.T) {
 	constructedErr = constructError(reason, details, dc)
 	timeoutErr, ok = constructedErr.(*TimeoutError)
 	require.True(t, ok)
-	require.Equal(t, s.TimeoutTypeHeartbeat, timeoutErr.TimeoutType())
+	require.Equal(t, TimeoutTypeHeartbeat, timeoutErr.TimeoutType())
 	require.False(t, timeoutErr.HasDetails())
 }
