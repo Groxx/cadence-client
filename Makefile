@@ -67,7 +67,7 @@ PROJECT_ROOT = go.uber.org/cadence
 BIN_PATH := PATH="$(abspath $(BIN)):$$PATH"
 
 # default test args, easy to override
-TEST_ARG ?= -v -race
+TEST_ARG ?= $(if $(verbose),-v) -race
 
 # set a V=1 env var for verbose output. V=0 (or unset) disables.
 # this is used to make two verbose flags:
@@ -155,6 +155,9 @@ $(BUILD)/dummy: $(ALL_SRC)
 	$Q go build ./...
 	$Q echo 'building all tests...'
 	$Q go test ./... -exec true >/dev/null
+	$Q echo 'go vet...'
+	$Q go vet ./...
+	$Q touch $@
 
 
 # ====================================
@@ -309,45 +312,38 @@ INTEG_GRPC_COVER_FILE := $(COVER_ROOT)/integ_test_grpc_cover.out
 UT_DIRS := $(filter-out $(INTEG_TEST_ROOT)%, $(sort $(dir $(filter %_test.go,$(ALL_SRC)))))
 
 .PHONY: unit_test integ_test_sticky_off integ_test_sticky_on integ_test_grpc cover cover_ci
-test: unit_test integ_test_sticky_off integ_test_sticky_on ## run all tests (requires a running cadence instance)
+test: unit_test integ_test_sticky_off integ_test_sticky_on integ_test_grpc ## run all tests (requires a running cadence instance)
 
-unit_test: $(ALL_SRC) ## run all unit tests
+unit_test $(UT_COVER_FILE): $(ALL_SRC) ## run all unit tests
 	$Q mkdir -p $(COVER_ROOT)
-	$Q echo "mode: atomic" > $(UT_COVER_FILE)
-	$Q failed=0; \
-	for dir in $(UT_DIRS); do \
-		mkdir -p $(COVER_ROOT)/"$$dir"; \
-		go test "$$dir" $(TEST_ARG) -coverprofile=$(COVER_ROOT)/"$$dir"/cover.out || failed=1; \
-		cat $(COVER_ROOT)/"$$dir"/cover.out | grep -v "mode: atomic" >> $(UT_COVER_FILE); \
-	done; \
-	exit $$failed
+	$Q go test $(TEST_ARG) ./... -covermode=atomic -coverprofile=$(UT_COVER_FILE) -coverpkg=./...
 
-integ_test_sticky_off: $(ALL_SRC)
+integ_test_sticky_off $(INTEG_STICKY_OFF_COVER_FILE): $(ALL_SRC)
 	$Q mkdir -p $(COVER_ROOT)
-	STICKY_OFF=true go test $(TEST_ARG) ./test -coverprofile=$(INTEG_STICKY_OFF_COVER_FILE) -coverpkg=./...
+	STICKY_OFF=true CADENCE_FRONTEND_ADDR=127.0.0.1:7933 go test $(TEST_ARG) ./internal/e2e/... -coverprofile=$(INTEG_STICKY_OFF_COVER_FILE) -coverpkg=./...
 
-integ_test_sticky_on: $(ALL_SRC)
+integ_test_sticky_on $(INTEG_STICKY_ON_COVER_FILE): $(ALL_SRC)
 	$Q mkdir -p $(COVER_ROOT)
-	STICKY_OFF=false go test $(TEST_ARG) ./test -coverprofile=$(INTEG_STICKY_ON_COVER_FILE) -coverpkg=./...
+	STICKY_OFF=false CADENCE_FRONTEND_ADDR=127.0.0.1:7933 go test $(TEST_ARG) ./internal/e2e/... -coverprofile=$(INTEG_STICKY_ON_COVER_FILE) -coverpkg=./...
 
-integ_test_grpc: $(ALL_SRC)
+integ_test_grpc $(INTEG_GRPC_COVER_FILE): $(ALL_SRC)
 	$Q mkdir -p $(COVER_ROOT)
-	STICKY_OFF=false go test $(TEST_ARG) ./test -coverprofile=$(INTEG_GRPC_COVER_FILE) -coverpkg=./...
+	ENABLE_GRPC_ADAPTER=yup STICKY_OFF=false CADENCE_FRONTEND_ADDR=127.0.0.1:7933 go test $(TEST_ARG) ./internal/e2e/... -coverprofile=$(INTEG_GRPC_COVER_FILE) -coverpkg=./...
 
 # intermediate product, ci needs a stable output, so use coverage_report.
 # running this target requires coverage files to have already been created, e.g. run ^ the above by hand, which happens in ci.
 $(COVER_ROOT)/cover.out: $(UT_COVER_FILE) $(INTEG_STICKY_OFF_COVER_FILE) $(INTEG_STICKY_ON_COVER_FILE) $(INTEG_GRPC_COVER_FILE)
 	$Q echo "mode: atomic" > $(COVER_ROOT)/cover.out
-	cat $(UT_COVER_FILE) | grep -v "mode: atomic" | grep -v ".gen" >> $(COVER_ROOT)/cover.out
-	cat $(INTEG_STICKY_OFF_COVER_FILE) | grep -v "mode: atomic" | grep -v ".gen" >> $(COVER_ROOT)/cover.out
-	cat $(INTEG_STICKY_ON_COVER_FILE) | grep -v "mode: atomic" | grep -v ".gen" >> $(COVER_ROOT)/cover.out
-	cat $(INTEG_GRPC_COVER_FILE) | grep -v "mode: atomic" | grep -v ".gen" >> $(COVER_ROOT)/cover.out
+	tail -n +2 $(UT_COVER_FILE) >> $(COVER_ROOT)/cover.out
+	tail -n +2 $(INTEG_STICKY_OFF_COVER_FILE) >> $(COVER_ROOT)/cover.out
+	tail -n +2 $(INTEG_STICKY_ON_COVER_FILE) >> $(COVER_ROOT)/cover.out
+	tail -n +2 $(INTEG_GRPC_COVER_FILE) >> $(COVER_ROOT)/cover.out
 
 coverage_report: $(COVER_ROOT)/cover.out
 	cp $< $@
 
 cover: $(COVER_ROOT)/cover.out
-	go tool cover -html=$(COVER_ROOT)/cover.out;
+	go tool cover -html=$(COVER_ROOT)/cover.out
 
 cover_ci: $(COVER_ROOT)/cover.out $(BIN)/goveralls
 	$(BIN)/goveralls -coverprofile=$(COVER_ROOT)/cover.out -service=buildkite || echo -e "\x1b[31mCoveralls failed\x1b[m";

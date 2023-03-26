@@ -176,7 +176,7 @@ func (ts *IntegrationTestSuite) TestBasic() {
 	ts.NoError(err)
 	ts.EqualValues(expected, ts.activities.invoked())
 	ts.Equal([]string{"ExecuteWorkflow begin", "ExecuteActivity", "ExecuteActivity", "ExecuteWorkflow end"},
-		ts.tracer.GetTrace("go.uber.org/cadence/test.(*Workflows).Basic"))
+		ts.tracer.GetTrace("go.uber.org/cadence/internal/e2e.(*Workflows).Basic"))
 }
 
 func (ts *IntegrationTestSuite) TestActivityRetryOnError() {
@@ -205,7 +205,7 @@ func (ts *IntegrationTestSuite) TestActivityRetryOnStartToCloseTimeout() {
 		"test-activity-retry-on-start2close-timeout",
 		ts.workflows.ActivityRetryOnTimeout,
 		&expected,
-		shared.TimeoutTypeStartToClose)
+		workflow.TimeoutTypeStartToClose)
 
 	ts.NoError(err)
 	ts.EqualValues(expected, ts.activities.invoked())
@@ -272,7 +272,7 @@ func (ts *IntegrationTestSuite) TestStackTraceQuery() {
 	ts.NotNil(value)
 	var trace string
 	ts.Nil(value.Get(&trace))
-	ts.True(strings.Contains(trace, "go.uber.org/cadence/test.(*Workflows).Basic"))
+	ts.True(strings.Contains(trace, "go.uber.org/cadence/internal/e2e.(*Workflows).Basic"))
 }
 
 func (ts *IntegrationTestSuite) TestConsistentQuery() {
@@ -417,7 +417,7 @@ func (ts *IntegrationTestSuite) TestChildWFWithMemoAndSearchAttributes() {
 	ts.EqualValues([]string{"getMemoAndSearchAttr"}, ts.activities.invoked())
 	ts.Equal("memoVal, searchAttrVal", result)
 	ts.Equal([]string{"ExecuteWorkflow begin", "ExecuteChildWorkflow", "ExecuteWorkflow end"},
-		ts.tracer.GetTrace("go.uber.org/cadence/test.(*Workflows).ChildWorkflowSuccess"))
+		ts.tracer.GetTrace("go.uber.org/cadence/internal/e2e.(*Workflows).ChildWorkflowSuccess"))
 }
 
 func (ts *IntegrationTestSuite) TestChildWFWithParentClosePolicyTerminate() {

@@ -73,18 +73,23 @@ func newConfig(t *testing.T) Config {
 		IsStickyOff:       true,
 	}
 	if name := getEnvServiceName(); name != "" {
+		t.Logf("overriding service name: %q", name)
 		cfg.ServiceName = name
 	}
 	if addr := getEnvServiceAddr(); addr != "" {
+		t.Logf("overriding service addr: %q", addr)
 		cfg.ServiceAddr = addr
 	}
 	if so := getEnvStickyOff(); so != "" {
+		t.Logf("overriding sticky: %v", so == "true")
 		cfg.IsStickyOff = so == "true"
 	}
 	if grpc := getEnableGrpcAdapter(); grpc != "" {
+		t.Logf("overriding grpc: %v", grpc == "true")
 		cfg.EnableGrpcAdapter = grpc == "true"
 	}
 	if debug := getDebug(); debug != "" {
+		t.Logf("overriding debug: %v", debug == "true")
 		cfg.Debug = debug == "true"
 	}
 	return cfg
