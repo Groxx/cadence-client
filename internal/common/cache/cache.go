@@ -36,6 +36,7 @@ type Cache interface {
 
 	// Put adds an element to the cache, returning the previous element
 	Put(key string, value interface{}) interface{}
+	Range(callback func(key string, value interface{}))
 
 	// PutIfNotExist puts a value associated with a given key if it does not exist
 	PutIfNotExist(key string, value interface{}) (interface{}, error)

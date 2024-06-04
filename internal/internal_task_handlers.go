@@ -438,6 +438,14 @@ func SetStickyWorkflowCacheSize(cacheSize int) {
 	stickyCacheSize = cacheSize
 }
 
+func GetCachedWorkflows() []string {
+	wids := []string{}
+	getWorkflowCache().Range(func(key string, value interface{}) {
+		wids = append(wids, value.(*workflowExecutionContextImpl).workflowInfo.WorkflowExecution.ID)
+	})
+	return wids
+}
+
 func getWorkflowCache() cache.Cache {
 	initCacheOnce.Do(func() {
 		stickyCacheLock.Lock()

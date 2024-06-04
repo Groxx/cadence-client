@@ -84,6 +84,14 @@ func (c *lru) Exist(key string) bool {
 	return ok
 }
 
+func (c *lru) Range(callback func(key string, value interface{})) {
+	c.mut.Lock()
+	defer c.mut.Unlock()
+	for k := range c.byKey {
+		callback(k, c.byKey[k])
+	}
+}
+
 // Get retrieves the value stored under the given key
 func (c *lru) Get(key string) interface{} {
 	c.mut.Lock()
