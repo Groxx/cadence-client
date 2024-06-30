@@ -177,7 +177,7 @@ A workflow's context can be canceled by either canceling the workflow, or callin
 a worfklow.WithCancel(ctx) call.  Both behave identically.
 
 At any time, you can convert a canceled (or could-be-canceled) context into a non-canceled context by using
-workflow.NewDisconnectedContext.  The resulting context will ignore cancellation from the context it is derived from.
+workflow.WithoutCancel.  The resulting context will ignore cancellation from the context it is derived from.
 Disconnected contexts like this can be created before or after a context has been canceled, and it does not matter
 how the cancellation occurred.
 Because this context will not be canceled, this can be useful for using context cancellation as a way to request that

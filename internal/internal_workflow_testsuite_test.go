@@ -2070,7 +2070,7 @@ func (s *WorkflowTestSuiteUnitTest) Test_DisconnectedContext() {
 	childWorkflowFn := func(ctx Context) (string, error) {
 		err := NewTimer(ctx, time.Minute*10).Get(ctx, nil)
 		if _, ok := err.(*CanceledError); ok {
-			dCtx, _ := NewDisconnectedContext(ctx)
+			dCtx, _ := WithoutCancel(ctx)
 			dCtx = WithActivityOptions(dCtx, s.activityOptions)
 			var cleanupResult string
 			err := ExecuteActivity(dCtx, testActivityHello, "cleanup").Get(dCtx, &cleanupResult)
