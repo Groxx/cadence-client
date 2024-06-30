@@ -85,9 +85,6 @@ func (r *registry) RegisterWorkflowWithOptions(
 	alias := options.Name
 	registerName := fnName
 
-	if options.EnableShortName {
-		registerName = getShortFunctionName(fnName)
-	}
 	if len(alias) > 0 {
 		registerName = alias
 	}
@@ -101,7 +98,7 @@ func (r *registry) RegisterWorkflowWithOptions(
 		}
 	}
 	r.workflowFuncMap[registerName] = wf
-	if len(alias) > 0 || options.EnableShortName {
+	if len(alias) > 0 {
 		r.workflowAliasMap[fnName] = registerName
 	}
 }
@@ -159,9 +156,6 @@ func (r *registry) registerActivityFunction(af interface{}, options RegisterActi
 	alias := options.Name
 	registerName := fnName
 
-	if options.EnableShortName {
-		registerName = getShortFunctionName(fnName)
-	}
 	if len(alias) > 0 {
 		registerName = alias
 	}
@@ -175,7 +169,7 @@ func (r *registry) registerActivityFunction(af interface{}, options RegisterActi
 		}
 	}
 	r.activityFuncMap[registerName] = &activityExecutor{registerName, af, options}
-	if len(alias) > 0 || options.EnableShortName {
+	if len(alias) > 0 {
 		r.activityAliasMap[fnName] = registerName
 	}
 
@@ -204,9 +198,6 @@ func (r *registry) registerActivityStruct(aStruct interface{}, options RegisterA
 		structPrefix := options.Name
 		registerName := methodName
 
-		if options.EnableShortName {
-			registerName = getShortFunctionName(methodName)
-		}
 		if len(structPrefix) > 0 {
 			registerName = structPrefix + getShortFunctionName(methodName)
 		}
@@ -217,7 +208,7 @@ func (r *registry) registerActivityStruct(aStruct interface{}, options RegisterA
 			}
 		}
 		r.activityFuncMap[registerName] = &activityExecutor{registerName, methodValue.Interface(), options}
-		if len(structPrefix) > 0 || options.EnableShortName {
+		if len(structPrefix) > 0 {
 			r.activityAliasMap[methodName] = registerName
 		}
 		count++

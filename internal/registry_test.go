@@ -44,14 +44,6 @@ func TestWorkflowRegistration(t *testing.T) {
 			resolveByFunction: testWorkflowFunction,
 		},
 		{
-			msg: "register workflow function with short name",
-			register: func(r *registry) {
-				r.RegisterWorkflowWithOptions(testWorkflowFunction, RegisterWorkflowOptions{EnableShortName: true})
-			},
-			workflowType:      "testWorkflowFunction",
-			resolveByFunction: testWorkflowFunction,
-		},
-		{
 			msg: "register workflow function with alias",
 			register: func(r *registry) {
 				r.RegisterWorkflowWithOptions(testWorkflowFunction, RegisterWorkflowOptions{Name: "workflow.alias"})
@@ -148,14 +140,6 @@ func TestActivityRegistration(t *testing.T) {
 			resolveByFunction: testActivityFunction,
 		},
 		{
-			msg: "register activity function with short name",
-			register: func(r *registry) {
-				r.RegisterActivityWithOptions(testActivityFunction, RegisterActivityOptions{EnableShortName: true})
-			},
-			activityType:      "testActivityFunction",
-			resolveByFunction: testActivityFunction,
-		},
-		{
 			msg: "register activity function with an alias",
 			register: func(r *registry) {
 				r.RegisterActivityWithOptions(testActivityFunction, RegisterActivityOptions{Name: "activity.alias"})
@@ -169,14 +153,6 @@ func TestActivityRegistration(t *testing.T) {
 			register:          func(r *registry) { r.RegisterActivity(&testActivityStruct{}) },
 			activityType:      "go.uber.org/cadence/internal.(*testActivityStruct).Method",
 			altActivityType:   "go.uber.org/cadence/internal.(*testActivityStruct).Method-fm",
-			resolveByFunction: (&testActivityStruct{}).Method,
-		},
-		{
-			msg: "register activity struct with short name",
-			register: func(r *registry) {
-				r.RegisterActivityWithOptions(&testActivityStruct{}, RegisterActivityOptions{EnableShortName: true})
-			},
-			activityType:      "Method",
 			resolveByFunction: (&testActivityStruct{}).Method,
 		},
 		{

@@ -833,14 +833,14 @@ func testWorkflowReturnStructPtrPtr(ctx Context, arg1 int) (result **testWorkflo
 func TestRegisterVariousWorkflowTypes(t *testing.T) {
 	r := newRegistry()
 	w := &aggregatedWorker{registry: r}
-	w.RegisterWorkflowWithOptions(testWorkflowSample, RegisterWorkflowOptions{EnableShortName: true})
-	w.RegisterWorkflowWithOptions(testWorkflowMultipleArgs, RegisterWorkflowOptions{EnableShortName: true})
-	w.RegisterWorkflowWithOptions(testWorkflowNoArgs, RegisterWorkflowOptions{EnableShortName: true})
-	w.RegisterWorkflowWithOptions(testWorkflowReturnInt, RegisterWorkflowOptions{EnableShortName: true})
-	w.RegisterWorkflowWithOptions(testWorkflowReturnString, RegisterWorkflowOptions{EnableShortName: true})
-	w.RegisterWorkflowWithOptions(testWorkflowReturnStruct, RegisterWorkflowOptions{EnableShortName: true})
-	w.RegisterWorkflowWithOptions(testWorkflowReturnStructPtr, RegisterWorkflowOptions{EnableShortName: true})
-	w.RegisterWorkflowWithOptions(testWorkflowReturnStructPtrPtr, RegisterWorkflowOptions{EnableShortName: true})
+	w.RegisterWorkflowWithOptions(testWorkflowSample, RegisterWorkflowOptions{Name: "testWorkflowSample"})
+	w.RegisterWorkflowWithOptions(testWorkflowMultipleArgs, RegisterWorkflowOptions{Name: "testWorkflowMultipleArgs"})
+	w.RegisterWorkflowWithOptions(testWorkflowNoArgs, RegisterWorkflowOptions{Name: "testWorkflowNoArgs"})
+	w.RegisterWorkflowWithOptions(testWorkflowReturnInt, RegisterWorkflowOptions{Name: "testWorkflowReturnInt"})
+	w.RegisterWorkflowWithOptions(testWorkflowReturnString, RegisterWorkflowOptions{Name: "testWorkflowReturnString"})
+	w.RegisterWorkflowWithOptions(testWorkflowReturnStruct, RegisterWorkflowOptions{Name: "testWorkflowReturnStruct"})
+	w.RegisterWorkflowWithOptions(testWorkflowReturnStructPtr, RegisterWorkflowOptions{Name: "testWorkflowReturnStructPtr"})
+	w.RegisterWorkflowWithOptions(testWorkflowReturnStructPtrPtr, RegisterWorkflowOptions{Name: "testWorkflowReturnStructPtrPtr"})
 
 	wfs := w.GetRegisteredWorkflows()
 	assert.Equal(t, 8, len(wfs))
@@ -849,7 +849,7 @@ func TestRegisterVariousWorkflowTypes(t *testing.T) {
 	assert.Contains(t, wfs, "testWorkflowNoArgs")
 	assert.Contains(t, wfs, "testWorkflowReturnInt")
 	assert.Contains(t, wfs, "testWorkflowReturnString")
-	assert.Contains(t, wfs, "testWorkflowReturnString")
+	assert.Contains(t, wfs, "testWorkflowReturnStruct")
 	assert.Contains(t, wfs, "testWorkflowReturnStructPtr")
 	assert.Contains(t, wfs, "testWorkflowReturnStructPtrPtr")
 
@@ -863,7 +863,7 @@ func TestRegisterVariousWorkflowTypes(t *testing.T) {
 func TestRegisterActivityWithOptions(t *testing.T) {
 	r := newRegistry()
 	w := &aggregatedWorker{registry: r}
-	w.RegisterActivityWithOptions(testActivityMultipleArgs, RegisterActivityOptions{EnableShortName: true})
+	w.RegisterActivityWithOptions(testActivityMultipleArgs, RegisterActivityOptions{Name: "testActivityMultipleArgs"})
 
 	wfs := w.GetRegisteredActivities()
 	assert.Equal(t, 1, len(wfs))
