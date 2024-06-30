@@ -102,6 +102,7 @@ type (
 		//	- BadRequestError
 		//	- WorkflowExecutionAlreadyStartedError
 		//	- InternalServiceError
+		// TODO: workflowFunc must be a string.  getting all the config needed into this call is fundamentally unreliable as it is disconnected from the workers.
 		StartWorkflow(ctx context.Context, options StartWorkflowOptions, workflowFunc interface{}, args ...interface{}) (*workflow.Execution, error)
 
 		// StartWorkflowAsync behaves like StartWorkflow except that the request is first queued and then processed asynchronously.
