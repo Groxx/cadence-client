@@ -260,7 +260,7 @@ func (t *TestWorkflowEnvironment) OnActivity(activity interface{}, args ...inter
 	switch fType.Kind() {
 	case reflect.Func:
 		fnType := reflect.TypeOf(activity)
-		if err := validateFnFormat(fnType, false); err != nil {
+		if err := ValidateFnFormat(fnType, false); err != nil {
 			panic(err)
 		}
 		fnName := getActivityFunctionName(t.impl.registry, activity)
@@ -306,7 +306,7 @@ func (t *TestWorkflowEnvironment) OnWorkflow(workflow interface{}, args ...inter
 	switch fType.Kind() {
 	case reflect.Func:
 		fnType := reflect.TypeOf(workflow)
-		if err := validateFnFormat(fnType, true); err != nil {
+		if err := ValidateFnFormat(fnType, true); err != nil {
 			panic(err)
 		}
 		fnName := getWorkflowFunctionName(t.impl.registry, workflow)

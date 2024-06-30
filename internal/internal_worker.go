@@ -531,8 +531,11 @@ func (aw *activityWorker) Stop() {
 	aw.worker.Stop()
 }
 
-// Validate function parameters.
-func validateFnFormat(fnType reflect.Type, isWorkflow bool) error {
+// ValidateFnFormat validates function parameters for workflows and activities.
+// Specifically that they accept the right context type, and that they return an error and at most one value.
+//
+// deprecated: this should only be used to check legacy code, it does not ensure activities accept a context.
+func ValidateFnFormat(fnType reflect.Type, isWorkflow bool) error {
 	if fnType.Kind() != reflect.Func {
 		return fmt.Errorf("expected a func as input but was %s", fnType.Kind())
 	}

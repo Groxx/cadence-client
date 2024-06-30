@@ -78,7 +78,7 @@ func (r *registry) RegisterWorkflowWithOptions(
 ) {
 	// Validate that it is a function
 	fnType := reflect.TypeOf(wf)
-	if err := validateFnFormat(fnType, true); err != nil {
+	if err := ValidateFnFormat(fnType, true); err != nil {
 		panic(err)
 	}
 	fnName := getFunctionName(wf)
@@ -108,14 +108,7 @@ func (r *registry) RegisterActivity(af interface{}) {
 }
 
 func (r *registry) RegisterActivityWithOptions(af interface{}, options RegisterActivityOptions) {
-	fnType := reflect.TypeOf(af)
-	var err error
-	if fnType.Kind() == reflect.Ptr && fnType.Elem().Kind() == reflect.Struct {
-		err = r.registerActivityStruct(af, options)
-	} else {
-		err = r.registerActivityFunction(af, options)
-	}
-
+	err := r.registerActivityFunction(af, options)
 	if err != nil {
 		panic(err)
 	}
@@ -148,7 +141,7 @@ func (r *registry) GetActivityFunc(registerName string) (interface{}, bool) {
 
 func (r *registry) registerActivityFunction(af interface{}, options RegisterActivityOptions) error {
 	fnType := reflect.TypeOf(af)
-	if err := validateFnFormat(fnType, false); err != nil {
+	if err := ValidateFnFormat(fnType, false); err != nil {
 		return fmt.Errorf("failed to register activity method: %v", err)
 	}
 
@@ -174,56 +167,6 @@ func (r *registry) registerActivityFunction(af interface{}, options RegisterActi
 	}
 
 	return nil
-}
-
-func (r *registry) registerActivityStruct(aStruct interface{}, options RegisterActivityOptions) error {
-	r.Lock()
-	defer r.Unlock()
-
-	structValue := reflect.ValueOf(aStruct)
-	structType := structValue.Type()
-	count := 0
-	for i := 0; i < structValue.NumMethod(); i++ {
-		methodValue := structValue.Method(i)
-		method := structType.Method(i)
-		// skip private method
-		if method.PkgPath != "" {
-			continue
-		}
-		methodName := getFunctionName(method.Func.Interface())
-		if err := validateFnFormat(method.Type, false); err != nil {
-			return fmt.Errorf("failed to register activity method %v of %v: %e", methodName, structType.Name(), err)
-		}
-
-		structPrefix := options.Name
-		registerName := methodName
-
-		if len(structPrefix) > 0 {
-			registerName = structPrefix + getShortFunctionName(methodName)
-		}
-
-		if !options.DisableAlreadyRegisteredCheck {
-			if _, ok := r.getActivityNoLock(registerName); ok {
-				return fmt.Errorf("activity type \"%v\" is already registered", registerName)
-			}
-		}
-		r.activityFuncMap[registerName] = &activityExecutor{registerName, methodValue.Interface(), options}
-		if len(structPrefix) > 0 {
-			r.activityAliasMap[methodName] = registerName
-		}
-		count++
-	}
-
-	if count == 0 {
-		return fmt.Errorf("no activities (public methods) found in %v structure", structType.Name())
-	}
-
-	return nil
-}
-
-func getShortFunctionName(fnName string) string {
-	elements := strings.Split(fnName, ".")
-	return elements[len(elements)-1]
 }
 
 func (r *registry) getWorkflowAlias(fnName string) (string, bool) {
