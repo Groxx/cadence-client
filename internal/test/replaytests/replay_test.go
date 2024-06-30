@@ -24,21 +24,19 @@ import (
 	"strings"
 	"testing"
 
-	"go.uber.org/cadence/activity"
-
 	"github.com/stretchr/testify/assert"
-
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap/zaptest"
 
-	"go.uber.org/cadence/worker"
+	"go.uber.org/cadence/activity"
 	"go.uber.org/cadence/workflow"
+	legacyWorker "go.uber.org/cadence/x/legacy/worker"
 )
 
 func TestReplayWorkflowHistoryFromFile(t *testing.T) {
 	for _, testFile := range []string{"basic.json", "basic_new.json", "version.json", "version_new.json"} {
 		t.Run("replay_"+strings.Split(testFile, ".")[0], func(t *testing.T) {
-			replayer := worker.NewWorkflowReplayer()
+			replayer := legacyWorker.NewWorkflowReplayer()
 			replayer.RegisterWorkflow(Workflow)
 			replayer.RegisterWorkflow(Workflow2)
 
@@ -49,7 +47,7 @@ func TestReplayWorkflowHistoryFromFile(t *testing.T) {
 }
 
 func TestReplayChildWorkflowBugBackport(t *testing.T) {
-	replayer := worker.NewWorkflowReplayer()
+	replayer := legacyWorker.NewWorkflowReplayer()
 	replayer.RegisterWorkflowWithOptions(childWorkflow, workflow.RegisterOptions{Name: "child"})
 	replayer.RegisterWorkflowWithOptions(childWorkflowBug, workflow.RegisterOptions{Name: "parent"})
 
@@ -59,14 +57,14 @@ func TestReplayChildWorkflowBugBackport(t *testing.T) {
 
 // Gives a non-deterministic-error because the getGreetingActivitytest was not registered on the replayer.
 func TestGreetingsWorkflowforActivity(t *testing.T) {
-	replayer := worker.NewWorkflowReplayer()
+	replayer := legacyWorker.NewWorkflowReplayer()
 	replayer.RegisterWorkflowWithOptions(greetingsWorkflowActivity, workflow.RegisterOptions{Name: "greetings"})
 	err := replayer.ReplayWorkflowHistoryFromJSONFile(zaptest.NewLogger(t), "greetings.json")
 	require.Error(t, err)
 }
 
 func TestGreetingsWorkflow(t *testing.T) {
-	replayer := worker.NewWorkflowReplayer()
+	replayer := legacyWorker.NewWorkflowReplayer()
 	replayer.RegisterWorkflowWithOptions(greetingsWorkflow, workflow.RegisterOptions{Name: "greetings"})
 	err := replayer.ReplayWorkflowHistoryFromJSONFile(zaptest.NewLogger(t), "greetings.json")
 	require.NoError(t, err)
@@ -74,7 +72,7 @@ func TestGreetingsWorkflow(t *testing.T) {
 
 // Should have failed but passed. Maybe, because the result recorded in history still matches the return type of the workflow.
 func TestGreetingsWorkflow3(t *testing.T) {
-	replayer := worker.NewWorkflowReplayer()
+	replayer := legacyWorker.NewWorkflowReplayer()
 	replayer.RegisterActivityWithOptions(getNameActivity3, activity.RegisterOptions{Name: "main.getNameActivity", DisableAlreadyRegisteredCheck: true})
 	replayer.RegisterWorkflowWithOptions(greetingsWorkflow3, workflow.RegisterOptions{Name: "greetings"})
 	err := replayer.ReplayWorkflowHistoryFromJSONFile(zaptest.NewLogger(t), "greetings.json")
@@ -83,7 +81,7 @@ func TestGreetingsWorkflow3(t *testing.T) {
 
 // Fails because the expected signature was different from history.
 func TestGreetingsWorkflow4(t *testing.T) {
-	replayer := worker.NewWorkflowReplayer()
+	replayer := legacyWorker.NewWorkflowReplayer()
 	replayer.RegisterActivityWithOptions(getNameActivity4, activity.RegisterOptions{Name: "main.getNameActivity", DisableAlreadyRegisteredCheck: true})
 	replayer.RegisterWorkflowWithOptions(greetingsWorkflow4, workflow.RegisterOptions{Name: "greetings"})
 	err := replayer.ReplayWorkflowHistoryFromJSONFile(zaptest.NewLogger(t), "greetings.json")
@@ -96,7 +94,7 @@ func TestGreetingsWorkflow4(t *testing.T) {
 func TestGreetingsWorkflow2(t *testing.T) {
 
 	t.Skip("Panic with failed to register activity. Here the activity returns incompatible arguments so the test should fail")
-	replayer := worker.NewWorkflowReplayer()
+	replayer := legacyWorker.NewWorkflowReplayer()
 	replayer.RegisterActivityWithOptions(getNameActivity2, activity.RegisterOptions{Name: "main.getNameActivity", DisableAlreadyRegisteredCheck: true})
 	replayer.RegisterWorkflowWithOptions(greetingsWorkflow2, workflow.RegisterOptions{Name: "greetings"})
 	err := replayer.ReplayWorkflowHistoryFromJSONFile(zaptest.NewLogger(t), "greetings.json")
@@ -108,7 +106,7 @@ func TestGreetingsWorkflow2(t *testing.T) {
 // activity here in the test.
 // The replayer still runs whatever it found in the history and passes.
 func TestExclusiveChoiceWorkflowWithUnregisteredActivity(t *testing.T) {
-	replayer := worker.NewWorkflowReplayer()
+	replayer := legacyWorker.NewWorkflowReplayer()
 
 	replayer.RegisterWorkflowWithOptions(exclusiveChoiceWorkflow, workflow.RegisterOptions{Name: "choice"})
 	err := replayer.ReplayWorkflowHistoryFromJSONFile(zaptest.NewLogger(t), "choice.json")
@@ -122,7 +120,7 @@ func TestExclusiveChoiceWorkflowWithUnregisteredActivity(t *testing.T) {
 // The replayer relies on whatever is recorded in the History so as long as the main activity name in the options matched partially
 // it doesn't raise errors.
 func TestExclusiveChoiceWorkflowWithDifferentActvityCombo(t *testing.T) {
-	replayer := worker.NewWorkflowReplayer()
+	replayer := legacyWorker.NewWorkflowReplayer()
 
 	replayer.RegisterWorkflowWithOptions(exclusiveChoiceWorkflow2, workflow.RegisterOptions{Name: "choice"})
 	replayer.RegisterActivityWithOptions(getAppleOrderActivity, activity.RegisterOptions{Name: "main.getOrderActivity"})
@@ -132,7 +130,7 @@ func TestExclusiveChoiceWorkflowWithDifferentActvityCombo(t *testing.T) {
 }
 
 func TestBranchWorkflow(t *testing.T) {
-	replayer := worker.NewWorkflowReplayer()
+	replayer := legacyWorker.NewWorkflowReplayer()
 
 	replayer.RegisterWorkflowWithOptions(sampleBranchWorkflow, workflow.RegisterOptions{Name: "branch"})
 
@@ -143,7 +141,7 @@ func TestBranchWorkflow(t *testing.T) {
 // Fails with a non deterministic error because there was an additional unexpected branch. Decreasing the number of branches will
 // also fail the test because the history expects the same number of branches executing the activity.
 func TestBranchWorkflowWithExtraBranch(t *testing.T) {
-	replayer := worker.NewWorkflowReplayer()
+	replayer := legacyWorker.NewWorkflowReplayer()
 
 	replayer.RegisterWorkflowWithOptions(sampleBranchWorkflow2, workflow.RegisterOptions{Name: "branch"})
 
@@ -154,7 +152,7 @@ func TestBranchWorkflowWithExtraBranch(t *testing.T) {
 // TestSequentialStepsWorkflow replays a history with 2 sequential activity calls and runs it against new version of the workflow code which only calls 1 activity.
 // This should be considered as non-determinism error.
 func TestSequentialStepsWorkflow(t *testing.T) {
-	replayer := worker.NewWorkflowReplayer()
+	replayer := legacyWorker.NewWorkflowReplayer()
 
 	replayer.RegisterWorkflowWithOptions(replayerHelloWorldWorkflow, workflow.RegisterOptions{Name: "fx.ReplayerHelloWorldWorkflow"})
 	replayer.RegisterActivityWithOptions(replayerHelloWorldActivity, activity.RegisterOptions{Name: "replayerhello"})
@@ -163,7 +161,7 @@ func TestSequentialStepsWorkflow(t *testing.T) {
 }
 
 func TestParallel(t *testing.T) {
-	replayer := worker.NewWorkflowReplayer()
+	replayer := legacyWorker.NewWorkflowReplayer()
 
 	replayer.RegisterWorkflowWithOptions(sampleParallelWorkflow, workflow.RegisterOptions{Name: "branch2"})
 
@@ -174,7 +172,7 @@ func TestParallel(t *testing.T) {
 // Should have failed since the first go routine has only one branch whereas the history has two branches.
 // The replayer totally misses this change.
 func TestParallel2(t *testing.T) {
-	replayer := worker.NewWorkflowReplayer()
+	replayer := legacyWorker.NewWorkflowReplayer()
 
 	replayer.RegisterWorkflowWithOptions(sampleParallelWorkflow2, workflow.RegisterOptions{Name: "branch2"})
 
@@ -186,7 +184,7 @@ func TestParallel2(t *testing.T) {
 // for continue as new case by replayWorkflowHistory().
 // This should not have any error because it's a valid continue as new case.
 func TestContinueAsNew(t *testing.T) {
-	replayer := worker.NewWorkflowReplayer()
+	replayer := legacyWorker.NewWorkflowReplayer()
 	replayer.RegisterWorkflowWithOptions(ContinueAsNewWorkflow, workflow.RegisterOptions{Name: "fx.SimpleSignalWorkflow"})
 	err := replayer.ReplayWorkflowHistoryFromJSONFile(zaptest.NewLogger(t), "continue_as_new.json")
 	assert.ErrorContains(t, err, "missing replay decision for WorkflowExecutionContinuedAsNew")

@@ -45,6 +45,7 @@ import (
 	"go.uber.org/cadence/internal"
 	"go.uber.org/cadence/worker"
 	"go.uber.org/cadence/workflow"
+	legacyWorker "go.uber.org/cadence/x/legacy/worker"
 )
 
 type IntegrationTestSuite struct {
@@ -456,7 +457,7 @@ func (ts *IntegrationTestSuite) TestChildWFCancel() {
 }
 
 func (ts *IntegrationTestSuite) TestActivityCancelUsingReplay() {
-	replayer := worker.NewWorkflowReplayer()
+	replayer := legacyWorker.NewWorkflowReplayer()
 	replayer.RegisterWorkflowWithOptions(ts.workflows.ActivityCancelRepro, workflow.RegisterOptions{DisableAlreadyRegisteredCheck: true})
 	err := replayer.ReplayPartialWorkflowHistoryFromJSONFile(zaptest.NewLogger(ts.T()), "fixtures/activity.cancel.sm.repro.json", 12)
 	ts.NoError(err)
