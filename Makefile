@@ -308,7 +308,10 @@ generate: $(BUILD)/generate ## run go-generate
 .PHONY: tidy
 tidy:
 	go mod tidy
+	cd client/proto; go mod tidy
+	cd client/thrift; go mod tidy
 	cd internal/tools; go mod tidy
+	go work sync
 
 .PHONY: all
 all: $(BUILD)/lint ## refresh codegen, lint, and ensure everything builds, whatever is necessary
