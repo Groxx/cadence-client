@@ -2,6 +2,20 @@ package structfill
 
 var _ = Thing{ // want `missing "field2"`
 	Field: "foo",
+	// OptionalField can be omitted thanks to lint:can-skip
+}
+
+// This should be valid - OptionalField can be skipped
+var _ = Thing{
+	Field:  "foo",
+	Field2: "bar",
+}
+
+// This should also be valid - OptionalField is explicitly filled
+var _ = Thing{
+	Field:         "foo",
+	Field2:        "bar",
+	OptionalField: "baz",
 }
 
 var _ = Thing2{

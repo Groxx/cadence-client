@@ -11,8 +11,17 @@ import (
 	"golang.org/x/tools/go/ast/inspector"
 )
 
+const (
+	// Magic comment strings
+	mustFillComment = "lint:must-fill"
+	canSkipComment  = "lint:can-skip"
+)
+
 // MustFillFact marks types that require all fields to be explicitly filled
-type MustFillFact struct{}
+// It also stores which fields can be skipped via // lint:can-skip comments
+type MustFillFact struct {
+	SkippableFields []string
+}
 
 // AFact implements analysis.Fact interface
 func (*MustFillFact) AFact() {}
@@ -55,11 +64,13 @@ func markStructs(pass *analysis.Pass) {
 						// Get the type object for this struct
 						obj := pass.TypesInfo.Defs[typeSpec.Name]
 						if obj != nil {
-							// Export the fact for this type
-							pass.ExportObjectFact(obj, &MustFillFact{})
+							// Find which fields can be skipped, and export the fact
+							skippableFields := parseSkippableFields(structType)
+							pass.ExportObjectFact(obj, &MustFillFact{
+								SkippableFields: skippableFields,
+							})
 						}
 					}
-					_ = structType // Acknowledge we found the struct type
 				}
 			}
 		}
@@ -80,7 +91,6 @@ func enforceRules(pass *analysis.Pass) {
 	})
 }
 
-// hasMustFillComment checks if the comment group contains "lint:must-fill" on its own line
 func hasMustFillComment(commentGroup *ast.CommentGroup) bool {
 	if commentGroup == nil {
 		return false
@@ -91,7 +101,39 @@ func hasMustFillComment(commentGroup *ast.CommentGroup) bool {
 	lines := strings.Split(text, "\n")
 
 	for _, line := range lines {
-		if strings.TrimSpace(line) == "lint:must-fill" {
+		if strings.TrimSpace(line) == mustFillComment {
+			return true
+		}
+	}
+	return false
+}
+
+func parseSkippableFields(structType *ast.StructType) []string {
+	var skippable []string
+
+	for _, field := range structType.Fields.List {
+		if hasCanSkipComment(field.Doc) || hasCanSkipComment(field.Comment) {
+			// Add all names in this field as skippable
+			for _, name := range field.Names {
+				skippable = append(skippable, name.Name)
+			}
+		}
+	}
+
+	return skippable
+}
+
+func hasCanSkipComment(commentGroup *ast.CommentGroup) bool {
+	if commentGroup == nil {
+		return false
+	}
+
+	// commentGroup.Text() removes // markers and leading/trailing whitespace
+	text := commentGroup.Text()
+	lines := strings.Split(text, "\n")
+
+	for _, line := range lines {
+		if strings.TrimSpace(line) == canSkipComment {
 			return true
 		}
 	}
@@ -127,6 +169,12 @@ func checkStructLiteral(pass *analysis.Pass, lit *ast.CompositeLit) {
 		return // This type doesn't require complete filling
 	}
 
+	// Convert skippable fields slice to map for efficient lookup
+	skippableFields := make(map[string]bool)
+	for _, field := range fact.SkippableFields {
+		skippableFields[field] = true
+	}
+
 	// Build a map of filled fields from the literal
 	filledFields := make(map[string]bool)
 	for _, elt := range lit.Elts {
@@ -140,14 +188,14 @@ func checkStructLiteral(pass *analysis.Pass, lit *ast.CompositeLit) {
 		}
 	}
 
-	// Check all struct fields are present
+	// Check all struct fields are present (unless they can be skipped)
 	for i := 0; i < structType.NumFields(); i++ {
 		field := structType.Field(i)
 		if !field.Exported() {
 			continue // Skip unexported fields
 		}
 
-		if !filledFields[field.Name()] {
+		if !filledFields[field.Name()] && !skippableFields[field.Name()] {
 			pass.Reportf(lit.Pos(), "missing %q", strings.ToLower(field.Name()))
 		}
 	}

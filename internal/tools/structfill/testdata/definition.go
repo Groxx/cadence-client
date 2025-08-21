@@ -5,6 +5,8 @@ package structfill
 type Thing struct { // want Thing:""
 	Field  string
 	Field2 string
+	// lint:can-skip
+	OptionalField string
 }
 
 // this does not have the magic comment,
