@@ -5,7 +5,7 @@ package structfill
 type Thing struct { // want Thing:""
 	Field  string
 	Field2 string
-	// lint:can-skip
+	// lint:can-skip this field is optional for backwards compatibility
 	OptionalField string
 }
 
@@ -16,7 +16,7 @@ type Thing2 struct {
 	Field2 string
 }
 
-// lint:must-fill
+// lint:must-fill with descriptive text allowed
 type Embedded struct { // want Embedded:""
 	Thing
 	Other string

@@ -60,7 +60,7 @@ func markStructs(pass *analysis.Pass) {
 			if typeSpec, ok := spec.(*ast.TypeSpec); ok {
 				if structType, ok := typeSpec.Type.(*ast.StructType); ok {
 					// Found a struct declaration, check for the magic comment
-					if hasMustFillComment(n.Doc) {
+					if hasCommentWithText(n.Doc, mustFillComment) {
 						// Get the type object for this struct
 						obj := pass.TypesInfo.Defs[typeSpec.Name]
 						if obj != nil {
@@ -78,7 +78,6 @@ func markStructs(pass *analysis.Pass) {
 }
 
 func enforceRules(pass *analysis.Pass) {
-	// Get the inspector from the inspect analyzer
 	inspect := pass.ResultOf[inspect.Analyzer].(*inspector.Inspector)
 
 	// Only look at CompositeLit nodes for efficiency
@@ -91,7 +90,9 @@ func enforceRules(pass *analysis.Pass) {
 	})
 }
 
-func hasMustFillComment(commentGroup *ast.CommentGroup) bool {
+// hasCommentWithText checks if the comment group contains a line that starts with the target string
+// The target must be at the beginning of the line, optionally followed by a space and additional text
+func hasCommentWithText(commentGroup *ast.CommentGroup, target string) bool {
 	if commentGroup == nil {
 		return false
 	}
@@ -101,8 +102,12 @@ func hasMustFillComment(commentGroup *ast.CommentGroup) bool {
 	lines := strings.Split(text, "\n")
 
 	for _, line := range lines {
-		if strings.TrimSpace(line) == mustFillComment {
-			return true
+		trimmed := strings.TrimSpace(line)
+		if trimmed == target {
+			return true // exact match
+		}
+		if strings.HasPrefix(trimmed, target+" ") {
+			return true // can have additional text after the target
 		}
 	}
 	return false
@@ -112,7 +117,7 @@ func parseSkippableFields(structType *ast.StructType) []string {
 	var skippable []string
 
 	for _, field := range structType.Fields.List {
-		if hasCanSkipComment(field.Doc) || hasCanSkipComment(field.Comment) {
+		if hasCommentWithText(field.Doc, canSkipComment) || hasCommentWithText(field.Comment, canSkipComment) {
 			// Add all names in this field as skippable
 			for _, name := range field.Names {
 				skippable = append(skippable, name.Name)
@@ -123,23 +128,6 @@ func parseSkippableFields(structType *ast.StructType) []string {
 	return skippable
 }
 
-func hasCanSkipComment(commentGroup *ast.CommentGroup) bool {
-	if commentGroup == nil {
-		return false
-	}
-
-	// commentGroup.Text() removes // markers and leading/trailing whitespace
-	text := commentGroup.Text()
-	lines := strings.Split(text, "\n")
-
-	for _, line := range lines {
-		if strings.TrimSpace(line) == canSkipComment {
-			return true
-		}
-	}
-	return false
-}
-
 // checkStructLiteral verifies that struct literals for MustFill types have all fields explicitly filled
 func checkStructLiteral(pass *analysis.Pass, lit *ast.CompositeLit) {
 	// Get the type of this composite literal
@@ -148,13 +136,14 @@ func checkStructLiteral(pass *analysis.Pass, lit *ast.CompositeLit) {
 		return
 	}
 
-	// Check if it's a struct type
+	// must be a struct type
 	structType, ok := tv.Type.Underlying().(*types.Struct)
 	if !ok {
 		return
 	}
 
-	// Get the named type (if any) to check for facts
+	// named types have an Obj() so we can get the fact.
+	// TODO: unsure if there are other possibilities here
 	var namedType *types.Named
 	if named, ok := tv.Type.(*types.Named); ok {
 		namedType = named
@@ -163,19 +152,18 @@ func checkStructLiteral(pass *analysis.Pass, lit *ast.CompositeLit) {
 		return
 	}
 
-	// Check if this type has the MustFillFact
 	var fact MustFillFact
 	if !pass.ImportObjectFact(namedType.Obj(), &fact) {
-		return // This type doesn't require complete filling
+		return // un-checked type
 	}
 
-	// Convert skippable fields slice to map for efficient lookup
+	// convert skippable fields slice to map for efficient lookup
 	skippableFields := make(map[string]bool)
 	for _, field := range fact.SkippableFields {
 		skippableFields[field] = true
 	}
 
-	// Build a map of filled fields from the literal
+	// build a map of filled fields from the literal
 	filledFields := make(map[string]bool)
 	for _, elt := range lit.Elts {
 		if kv, ok := elt.(*ast.KeyValueExpr); ok {
@@ -192,7 +180,7 @@ func checkStructLiteral(pass *analysis.Pass, lit *ast.CompositeLit) {
 	for i := 0; i < structType.NumFields(); i++ {
 		field := structType.Field(i)
 		if !field.Exported() {
-			continue // Skip unexported fields
+			continue // skip unexported fields
 		}
 
 		if !filledFields[field.Name()] && !skippableFields[field.Name()] {
