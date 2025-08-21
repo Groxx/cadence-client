@@ -1,6 +1,6 @@
 package structfill
 
-var _ = Thing{ // want `missing "field2"`
+var _ = Thing{ // want `missing "Field2"`
 	Field: "foo",
 	// OptionalField can be omitted thanks to lint:can-skip
 }
@@ -24,7 +24,7 @@ var _ = Thing2{
 }
 
 // getting a pointer to a struct must still be filled
-var _ = &Thing{ // want `missing "field2"`
+var _ = &Thing{ // want `missing "Field2"`
 	Field: "foo",
 }
 
@@ -35,12 +35,12 @@ var _ = struct {
 	Field: "foo",
 }
 var (
-	_ = Embedded{ // want `missing "thing"`
+	_ = Embedded{ // want `missing "Thing"`
 		Other: "bar",
 	}
 
 	_ = Embedded{
-		Thing: Thing{}, // want `missing "field"` `missing "field2"`
+		Thing: Thing{}, // want `missing "Field"` `missing "Field2"`
 		Other: "bar",
 	}
 )

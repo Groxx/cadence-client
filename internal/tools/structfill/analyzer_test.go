@@ -10,3 +10,30 @@ func TestAnalyzer(t *testing.T) {
 	testdata := analysistest.TestData()
 	analysistest.Run(t, testdata, Analyzer, "example.org/structfill")
 }
+
+func TestEnforcerMode(t *testing.T) {
+	testdata := analysistest.TestData()
+	// Test with enforcer mode enabled for the "enforced" package
+	analyzer := *Analyzer
+	analyzer.Flags.Set("enforce", "example.org/structfill/enforced")
+	analysistest.Run(t, testdata, &analyzer, "example.org/structfill/enforced")
+}
+
+func TestIgnoreTests(t *testing.T) {
+	testdata := analysistest.TestData()
+	// Test with ignore-tests flag enabled - should not report any diagnostics on test files
+	analyzer := *Analyzer
+	analyzer.Flags.Set("ignore-tests", "true")
+	analyzer.Flags.Set("ignore-generated", "true")
+	analysistest.Run(t, testdata, &analyzer, "example.org/structfill")
+}
+
+func TestEnforcerModeWithIgnoreGenerated(t *testing.T) {
+	testdata := analysistest.TestData()
+	// Test with both enforcer mode AND ignore-generated enabled
+	// Should enforce struct filling in enforced package but skip generated files
+	analyzer := *Analyzer
+	analyzer.Flags.Set("enforce", "example.org/structfill/enforced_generated")
+	analyzer.Flags.Set("ignore-generated", "true")
+	analysistest.Run(t, testdata, &analyzer, "example.org/structfill/enforced_generated")
+}

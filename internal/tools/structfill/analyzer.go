@@ -4,6 +4,7 @@ import (
 	"go/ast"
 	"go/token"
 	"go/types"
+	"path/filepath"
 	"strings"
 
 	"golang.org/x/tools/go/analysis"
@@ -17,6 +18,15 @@ const (
 	canSkipComment  = "lint:can-skip"
 )
 
+var (
+	// enforcePaths specifies package paths where ALL structs should be treated as must-fill
+	enforcePaths string
+	// ignoreTests controls whether to skip analysis in test files (_test.go)
+	ignoreTests bool
+	// ignoreGenerated controls whether to skip analysis in generated files
+	ignoreGenerated bool
+)
+
 // MustFillFact marks types that require all fields to be explicitly filled
 // It also stores which fields can be skipped via // lint:can-skip comments
 type MustFillFact struct {
@@ -27,17 +37,106 @@ type MustFillFact struct {
 func (*MustFillFact) AFact() {}
 
 var Analyzer = &analysis.Analyzer{
-	Name:      "structfill",
-	Doc:       "Ensures structs with // lint:must-fill comments have all fields explicitly filled",
+	Name: "structfill",
+	Doc: `Ensures structs with // lint:must-fill comments have all fields explicitly filled.
+
+Use -enforce flag to treat ALL structs in specified packages as must-fill:
+  -enforce="github.com/example/api,github.com/example/types"
+  -enforce="github.com/example/..."  (matches all subpackages)
+
+Use -ignore-tests flag to skip analysis of test files:
+  -ignore-tests=true  (skips all *_test.go files)
+
+Use -ignore-generated flag to skip analysis of generated files:
+  -ignore-generated=true  (skips files with 'Code generated' and 'DO NOT EDIT' comments)`,
 	Run:       run,
 	FactTypes: []analysis.Fact{(*MustFillFact)(nil)},
 	Requires:  []*analysis.Analyzer{inspect.Analyzer},
+}
+
+func init() {
+	Analyzer.Flags.StringVar(&enforcePaths, "enforce", "", "comma-separated list of import paths where all structs are treated as must-fill")
+	Analyzer.Flags.BoolVar(&ignoreTests, "ignore-tests", false, "skip analysis of test files (_test.go)")
+	Analyzer.Flags.BoolVar(&ignoreGenerated, "ignore-generated", false, "skip analysis of generated files (containing 'Code generated' and 'DO NOT EDIT' comments)")
 }
 
 func run(pass *analysis.Pass) (interface{}, error) {
 	markStructs(pass)
 	enforceRules(pass)
 	return nil, nil
+}
+
+// shouldIgnoreFile returns true if the file should be ignored based on ignore flags
+func shouldIgnoreFile(pass *analysis.Pass, filename string) bool {
+	if ignoreTests && strings.HasSuffix(filepath.Base(filename), "_test.go") {
+		return true
+	}
+	
+	if ignoreGenerated {
+		// find the file in pass.Files to check for generated file comments
+		for _, file := range pass.Files {
+			filePos := pass.Fset.Position(file.Pos())
+			if filePos.Filename == filename {
+				return isGeneratedFile(file)
+			}
+		}
+	}
+	
+	return false
+}
+
+// isGeneratedFile checks if a file contains the standard generated file comment
+func isGeneratedFile(file *ast.File) bool {
+	if len(file.Comments) == 0 {
+		return false
+	}
+	
+	// check the first few comment groups for the generated file pattern
+	for _, commentGroup := range file.Comments[:min(len(file.Comments), 3)] {
+		text := commentGroup.Text()
+		// look for the standard pattern: "Code generated" and "DO NOT EDIT"
+		if strings.Contains(text, "Code generated") && strings.Contains(text, "DO NOT EDIT") {
+			return true
+		}
+	}
+	
+	return false
+}
+
+// min returns the smaller of two integers
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+// isPackageEnforced checks if the current package should have all structs treated as must-fill
+func isPackageEnforced(pass *analysis.Pass) bool {
+	if enforcePaths == "" {
+		return false
+	}
+
+	currentPkg := pass.Pkg.Path()
+	enforcedPaths := strings.Split(enforcePaths, ",")
+
+	for _, path := range enforcedPaths {
+		path = strings.TrimSpace(path)
+		if path == "" {
+			continue
+		}
+		// check for exact match or prefix match with "/..." suffix
+		if currentPkg == path {
+			return true
+		}
+		if strings.HasSuffix(path, "/...") {
+			prefix := strings.TrimSuffix(path, "/...")
+			if strings.HasPrefix(currentPkg, prefix+"/") || currentPkg == prefix {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func markStructs(pass *analysis.Pass) {
@@ -47,8 +146,17 @@ func markStructs(pass *analysis.Pass) {
 	// only look at GenDecl nodes for efficiency
 	nodeFilter := []ast.Node{(*ast.GenDecl)(nil)}
 
+	// check if this package is in enforcer mode
+	packageEnforced := isPackageEnforced(pass)
+
 	inspect.Preorder(nodeFilter, func(node ast.Node) {
 		n := node.(*ast.GenDecl)
+
+		// skip if this node is in a test file and we're ignoring tests
+		pos := pass.Fset.Position(n.Pos())
+		if shouldIgnoreFile(pass, pos.Filename) {
+			return
+		}
 
 		// check if this is a type declaration
 		if n.Tok != token.TYPE {
@@ -59,8 +167,11 @@ func markStructs(pass *analysis.Pass) {
 		for _, spec := range n.Specs {
 			if typeSpec, ok := spec.(*ast.TypeSpec); ok {
 				if structType, ok := typeSpec.Type.(*ast.StructType); ok {
-					// found a struct declaration, check for the magic comment
-					if hasCommentWithText(n.Doc, mustFillComment) {
+					// found a struct declaration
+					// check if it should be treated as must-fill (either has comment or package is enforced)
+					shouldEnforce := packageEnforced || hasCommentWithText(n.Doc, mustFillComment)
+
+					if shouldEnforce {
 						// get the type object for this struct
 						obj := pass.TypesInfo.Defs[typeSpec.Name]
 						if obj != nil {
@@ -85,6 +196,13 @@ func enforceRules(pass *analysis.Pass) {
 
 	inspect.Preorder(nodeFilter, func(node ast.Node) {
 		n := node.(*ast.CompositeLit)
+
+		// skip if this node is in a test file and we're ignoring tests
+		pos := pass.Fset.Position(n.Pos())
+		if shouldIgnoreFile(pass, pos.Filename) {
+			return
+		}
+
 		// found a struct literal, check if it needs complete filling
 		checkStructLiteral(pass, n)
 	})
@@ -184,7 +302,7 @@ func checkStructLiteral(pass *analysis.Pass, lit *ast.CompositeLit) {
 		}
 
 		if !filledFields[field.Name()] && !skippableFields[field.Name()] {
-			pass.Reportf(lit.Pos(), "missing %q", strings.ToLower(field.Name()))
+			pass.Reportf(lit.Pos(), "missing %q", field.Name())
 		}
 	}
 }
