@@ -54,3 +54,9 @@ func TestSkipSpecificTypes(t *testing.T) {
 	analyzer.Flags.Set("skip", "example.org/structfill/skip_types.SkippableType")
 	analysistest.Run(t, testdata, &analyzer, "example.org/structfill/skip_types")
 }
+
+func TestDefaultSkippedTypes(t *testing.T) {
+	testdata := analysistest.TestData()
+	// Test that default skipped types (sync.Mutex, etc.) are automatically exempted
+	analysistest.Run(t, testdata, Analyzer, "example.org/structfill/default_skipped")
+}

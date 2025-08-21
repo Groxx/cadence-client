@@ -19,6 +19,18 @@ const (
 )
 
 var (
+	// defaultSkippedTypes is a list of types that are automatically skipped
+	// regardless of flags. These are typically standard library types that
+	// should not require explicit field filling.
+	defaultSkippedTypes = []string{
+		"sync.Mutex",
+		"sync.RWMutex",
+		"sync.WaitGroup",
+		"sync.Once",
+	}
+)
+
+var (
 	// enforcePaths specifies package paths where ALL structs should be treated as must-fill
 	enforcePaths string
 	// ignoreTests controls whether to skip analysis in test files (_test.go)
@@ -48,6 +60,9 @@ Use -enforce flag to treat ALL structs in specified packages as must-fill:
 
 Use -skip flag to exempt specific types from enforcement:
   -skip="github.com/pkg/errors.Frame,example.com/api.Request"
+
+Default skipped types (automatically exempted):
+  sync.Mutex, sync.RWMutex, sync.WaitGroup, sync.Once
 
 Use -ignore-tests flag to skip analysis of test files:
   -ignore-tests=true  (skips all *_test.go files)
@@ -97,28 +112,70 @@ func shouldIgnoreFile(pass *analysis.Pass, filename string) bool {
 }
 
 // isTypeSkipped checks if a specific type should be skipped based on the -skip flag
+// or the default skip list
 func isTypeSkipped(namedType *types.Named) bool {
-	if skipTypes == "" {
-		return false
-	}
-	
 	// get the full type identifier: package.path.TypeName
 	pkg := namedType.Obj().Pkg()
 	if pkg == nil {
 		return false
 	}
-	
+
 	fullTypeName := pkg.Path() + "." + namedType.Obj().Name()
-	
-	// check against the list of skipped types
-	skippedTypes := strings.Split(skipTypes, ",")
-	for _, skipped := range skippedTypes {
-		skipped = strings.TrimSpace(skipped)
+
+	// check against the default skip list first
+	for _, skipped := range defaultSkippedTypes {
 		if skipped == fullTypeName {
 			return true
 		}
 	}
-	
+
+	// check against the list of skipped types from -skip flag
+	if skipTypes != "" {
+		skippedTypes := strings.Split(skipTypes, ",")
+		for _, skipped := range skippedTypes {
+			skipped = strings.TrimSpace(skipped)
+			if skipped == fullTypeName {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
+// isFieldTypeSkipped checks if a field's type is in the default skipped types list
+func isFieldTypeSkipped(field *types.Var) bool {
+	fieldType := field.Type()
+
+	// get the named type if it exists
+	var namedType *types.Named
+	if named, ok := fieldType.(*types.Named); ok {
+		namedType = named
+	} else if ptr, ok := fieldType.(*types.Pointer); ok {
+		if named, ok := ptr.Elem().(*types.Named); ok {
+			namedType = named
+		}
+	}
+
+	if namedType == nil {
+		return false
+	}
+
+	// get the full type identifier: package.path.TypeName
+	pkg := namedType.Obj().Pkg()
+	if pkg == nil {
+		return false
+	}
+
+	fullTypeName := pkg.Path() + "." + namedType.Obj().Name()
+
+	// check against the default skip list
+	for _, skipped := range defaultSkippedTypes {
+		if skipped == fullTypeName {
+			return true
+		}
+	}
+
 	return false
 }
 
@@ -315,7 +372,7 @@ func checkStructLiteral(pass *analysis.Pass, lit *ast.CompositeLit) {
 	if !pass.ImportObjectFact(namedType.Obj(), &fact) {
 		return // un-checked type
 	}
-	
+
 	// check if this specific type should be skipped via command-line flag
 	if isTypeSkipped(namedType) {
 		return // type is explicitly skipped
@@ -347,7 +404,7 @@ func checkStructLiteral(pass *analysis.Pass, lit *ast.CompositeLit) {
 			continue // skip unexported fields
 		}
 
-		if !filledFields[field.Name()] && !skippableFields[field.Name()] {
+		if !filledFields[field.Name()] && !skippableFields[field.Name()] && !isFieldTypeSkipped(field) {
 			pass.Reportf(lit.Pos(), "missing %q", field.Name())
 		}
 	}
