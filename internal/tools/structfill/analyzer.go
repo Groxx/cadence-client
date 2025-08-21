@@ -25,6 +25,8 @@ var (
 	ignoreTests bool
 	// ignoreGenerated controls whether to skip analysis in generated files
 	ignoreGenerated bool
+	// skipTypes specifies specific types to skip enforcement for
+	skipTypes string
 )
 
 // MustFillFact marks types that require all fields to be explicitly filled
@@ -43,6 +45,9 @@ var Analyzer = &analysis.Analyzer{
 Use -enforce flag to treat ALL structs in specified packages as must-fill:
   -enforce="github.com/example/api,github.com/example/types"
   -enforce="github.com/example/..."  (matches all subpackages)
+
+Use -skip flag to exempt specific types from enforcement:
+  -skip="github.com/pkg/errors.Frame,example.com/api.Request"
 
 Use -ignore-tests flag to skip analysis of test files:
   -ignore-tests=true  (skips all *_test.go files)
@@ -63,6 +68,7 @@ func init() {
 	Analyzer.Flags.StringVar(&enforcePaths, "enforce", "", "comma-separated list of import paths where all structs are treated as must-fill")
 	Analyzer.Flags.BoolVar(&ignoreTests, "ignore-tests", false, "skip analysis of test files (_test.go)")
 	Analyzer.Flags.BoolVar(&ignoreGenerated, "ignore-generated", false, "skip analysis of generated files (containing 'Code generated' and 'DO NOT EDIT' comments)")
+	Analyzer.Flags.StringVar(&skipTypes, "skip", "", "comma-separated list of specific types to skip (e.g., 'github.com/pkg/errors.Frame,example.com/api.Request')")
 }
 
 func run(pass *analysis.Pass) (interface{}, error) {
@@ -87,6 +93,32 @@ func shouldIgnoreFile(pass *analysis.Pass, filename string) bool {
 		}
 	}
 
+	return false
+}
+
+// isTypeSkipped checks if a specific type should be skipped based on the -skip flag
+func isTypeSkipped(namedType *types.Named) bool {
+	if skipTypes == "" {
+		return false
+	}
+	
+	// get the full type identifier: package.path.TypeName
+	pkg := namedType.Obj().Pkg()
+	if pkg == nil {
+		return false
+	}
+	
+	fullTypeName := pkg.Path() + "." + namedType.Obj().Name()
+	
+	// check against the list of skipped types
+	skippedTypes := strings.Split(skipTypes, ",")
+	for _, skipped := range skippedTypes {
+		skipped = strings.TrimSpace(skipped)
+		if skipped == fullTypeName {
+			return true
+		}
+	}
+	
 	return false
 }
 
@@ -282,6 +314,11 @@ func checkStructLiteral(pass *analysis.Pass, lit *ast.CompositeLit) {
 	var fact MustFillFact
 	if !pass.ImportObjectFact(namedType.Obj(), &fact) {
 		return // un-checked type
+	}
+	
+	// check if this specific type should be skipped via command-line flag
+	if isTypeSkipped(namedType) {
+		return // type is explicitly skipped
 	}
 
 	// convert skippable fields slice to map for efficient lookup
