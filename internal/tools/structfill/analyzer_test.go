@@ -37,3 +37,12 @@ func TestEnforcerModeWithIgnoreGenerated(t *testing.T) {
 	analyzer.Flags.Set("ignore-generated", "true")
 	analysistest.Run(t, testdata, &analyzer, "example.org/structfill/enforced_generated")
 }
+
+func TestStructLevelCanSkip(t *testing.T) {
+	testdata := analysistest.TestData()
+	// Test that struct-level // lint:can-skip exempts structs from enforcer mode
+	// while struct-level // lint:must-fill still enforces rules
+	analyzer := *Analyzer
+	analyzer.Flags.Set("enforce", "example.org/structfill/enforced")
+	analysistest.Run(t, testdata, &analyzer, "example.org/structfill/enforced")
+}

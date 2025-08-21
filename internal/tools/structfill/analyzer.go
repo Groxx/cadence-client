@@ -48,7 +48,12 @@ Use -ignore-tests flag to skip analysis of test files:
   -ignore-tests=true  (skips all *_test.go files)
 
 Use -ignore-generated flag to skip analysis of generated files:
-  -ignore-generated=true  (skips files with 'Code generated' and 'DO NOT EDIT' comments)`,
+  -ignore-generated=true  (skips files with 'Code generated' and 'DO NOT EDIT' comments)
+
+Comments:
+  // lint:must-fill   - struct requires all fields to be filled
+  // lint:can-skip    - at struct level: exempts struct from -enforce mode
+                     - at field level: allows field to be omitted`,
 	Run:       run,
 	FactTypes: []analysis.Fact{(*MustFillFact)(nil)},
 	Requires:  []*analysis.Analyzer{inspect.Analyzer},
@@ -71,7 +76,7 @@ func shouldIgnoreFile(pass *analysis.Pass, filename string) bool {
 	if ignoreTests && strings.HasSuffix(filepath.Base(filename), "_test.go") {
 		return true
 	}
-	
+
 	if ignoreGenerated {
 		// find the file in pass.Files to check for generated file comments
 		for _, file := range pass.Files {
@@ -81,7 +86,7 @@ func shouldIgnoreFile(pass *analysis.Pass, filename string) bool {
 			}
 		}
 	}
-	
+
 	return false
 }
 
@@ -90,7 +95,7 @@ func isGeneratedFile(file *ast.File) bool {
 	if len(file.Comments) == 0 {
 		return false
 	}
-	
+
 	// check the first few comment groups for the generated file pattern
 	for _, commentGroup := range file.Comments[:min(len(file.Comments), 3)] {
 		text := commentGroup.Text()
@@ -99,7 +104,7 @@ func isGeneratedFile(file *ast.File) bool {
 			return true
 		}
 	}
-	
+
 	return false
 }
 
@@ -169,7 +174,11 @@ func markStructs(pass *analysis.Pass) {
 				if structType, ok := typeSpec.Type.(*ast.StructType); ok {
 					// found a struct declaration
 					// check if it should be treated as must-fill (either has comment or package is enforced)
-					shouldEnforce := packageEnforced || hasCommentWithText(n.Doc, mustFillComment)
+					hasMustFill := hasCommentWithText(n.Doc, mustFillComment)
+					hasCanSkip := hasCommentWithText(n.Doc, canSkipComment)
+
+					// determine if we should enforce: must have explicit must-fill OR be in enforced package AND not have can-skip
+					shouldEnforce := hasMustFill || (packageEnforced && !hasCanSkip)
 
 					if shouldEnforce {
 						// get the type object for this struct
