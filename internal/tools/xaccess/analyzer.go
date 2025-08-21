@@ -1,6 +1,7 @@
 package xaccess
 
 import (
+	"fmt"
 	"go/ast"
 	"go/types"
 
@@ -34,6 +35,70 @@ type Config map[string]Rules
 // I hate it, but oh well.
 var ControlledAccess = Config{}
 
+// LimitAccess limits the access to a "thing" to the list of allowed packages.
+//
+// If no allowed paths are given, the path/item is completely blocked.
+// If some paths are given, they will be *added to* the allowed list.
+//
+// All values must be specific, i.e. you cannot use a wildcard or glob.
+// If you really need to do that, build a helper in the allowed package,
+// and use the blocked thing through that helper.
+//
+// No duplicates or conflicting rules are allowed, i.e. you cannot
+// allow something on some paths and then block it completely:
+//
+//	LimitAccess("example.org/x", "your.org")
+//	LimitAccess("example.org/x") // panics
+//
+// The reverse order is allowed though, i.e. you can block something
+// and then allow it on some paths:
+//
+//	LimitAccess("example.org/x")
+//	LimitAccess("example.org/x", "your.org")      // only your.org is allowed
+//	LimitAccess("example.org/x", "someother.org") // both orgs are allowed
+//	LimitAccess("example.org/x", "your.org")      // panics, this is a duplicate
+//
+// You can target entire packages and/or specific (accessible) things within a package,
+// which can be specified in any order:
+//
+//	LimitAccess("example.org/x")       // everything in the package is limited
+//	LimitAccess("example.org/x.Thing") // only this one `Thing` is limited
+//
+// Limiting a package does not currently prevent it from being underscore-imported,
+// as this does not actually "use" anything, so it can still be used to trigger
+// `init` behavior.  This may be restricted later, at which point there should be a
+// `your/package.init` path to allow this behavior.
+//
+// To clear all access rules, e.g. for testing, pass only an empty string:
+//
+//	LimitAccess("") // clears all access rules
+func LimitAccess(pkgOrTypeName string, allowed ...string) {
+	if pkgOrTypeName == "" && len(allowed) == 0 {
+		ControlledAccess = Config{}
+		return
+	}
+
+	rules, ok := ControlledAccess[pkgOrTypeName]
+	if ok && len(allowed) == 0 {
+		if len(rules.Allowed) == 0 {
+			panic(fmt.Sprintf("limited-access %q is already limited", pkgOrTypeName))
+		} else {
+			panic(fmt.Sprintf("limited-access %q is already allowing some packages, cannot be fully limited: %v", pkgOrTypeName, rules.Allowed))
+		}
+	}
+
+	if len(rules.Allowed) == 0 {
+		rules.Allowed = map[string]bool{}
+	}
+	for _, a := range allowed {
+		if _, ok := rules.Allowed[a]; ok {
+			panic(fmt.Sprintf("limited-access %q is already allowing %q", pkgOrTypeName, a))
+		}
+		rules.Allowed[a] = true
+	}
+	ControlledAccess[pkgOrTypeName] = rules
+}
+
 func run(pass *analysis.Pass) (interface{}, error) {
 	markObjects(pass, ControlledAccess)
 	checkUsage(pass, ControlledAccess)
@@ -45,7 +110,7 @@ func markObjects(pass *analysis.Pass, controlled Config) {
 		// loop over top-level decls, simpler to check than TypesInfo.Defs
 		for _, decl := range file.Decls {
 			// Check if this is a function or type declaration
-			if obj := declaredObject(pass, decl); obj != nil {
+			for _, obj := range declaredObjects(pass, decl) {
 				// look for package-wide restrictions, mark everything
 				if _, ok := controlled[pass.Pkg.Path()]; ok {
 					pass.ExportObjectFact(obj, &fact{})
@@ -86,33 +151,40 @@ func checkUsage(pass *analysis.Pass, controlled Config) {
 	}
 }
 
-// declaredObject extracts the types.Object from a declaration, if any
-func declaredObject(pass *analysis.Pass, decl interface{}) types.Object {
+func declaredObjects(pass *analysis.Pass, decl ast.Decl) []types.Object {
 	switch d := decl.(type) {
 	case *ast.FuncDecl:
+		// top-level functions and methods on types, i.e.:
+		//   func (r receiver) Method() {}
+		// ^ because that's still "a function".
+		//
+		// both of these can be accessed and have a "type name", e.g. "import/path.(*Thing).Method"
 		if d.Name != nil && d.Name.IsExported() {
-			return pass.TypesInfo.Defs[d.Name]
+			return []types.Object{pass.TypesInfo.Defs[d.Name]}
 		}
 	case *ast.GenDecl:
+		var all []types.Object
 		for _, spec := range d.Specs {
 			switch s := spec.(type) {
 			case *ast.TypeSpec:
+				// the types themselves are the only things that have "names".
+				// this covers everything starting with `type`, e.g. structs, interfaces, etc.
 				if s.Name != nil && s.Name.IsExported() {
-					return pass.TypesInfo.Defs[s.Name]
+					all = append(all, pass.TypesInfo.Defs[s.Name])
 				}
 			case *ast.ValueSpec:
 				for _, name := range s.Names {
 					if name != nil && name.IsExported() {
-						return pass.TypesInfo.Defs[name]
+						all = append(all, pass.TypesInfo.Defs[name])
 					}
 				}
 			}
 		}
+		return all
 	}
 	return nil
 }
 
-// matchesTarget checks if the given object matches our hardcoded target
 func getFullName(obj types.Object) string {
 	if obj == nil {
 		// irrelevant, can't be accessed
@@ -123,6 +195,7 @@ func getFullName(obj types.Object) string {
 	pkg := obj.Pkg()
 	if pkg == nil {
 		// probably not possible, seems like it'd be a builtin?
+		// that wouldn't be "exported" though, they're all lowercase.
 		return "<nil pkg>"
 	}
 

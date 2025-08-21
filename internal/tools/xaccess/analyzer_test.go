@@ -8,20 +8,18 @@ import (
 
 func TestAnalyzer(t *testing.T) {
 	testdata := analysistest.TestData()
-	ControlledAccess = Config{
-		// does not support ... wildcards so no parsing needs to happen, just equality.
-		// if you need this, you can just build your list from `go list`, and it'll always be correct.
-		"example.org/decl": {},
-		// specific-thing definitions are additive, and can allow stuff that is blocked at a package level.
-		// decl.Public is still blocked.
-		"example.org/decl.Func": {
-			Allowed: map[string]bool{
-				"example.org/allowed": true,
-			},
-		},
-	}
+
+	LimitAccess("example.org/decl")
+	LimitAccess("example.org/decl.Func", "example.org/allowed")
+	LimitAccess("example.org/decl.Thing", "example.org/allowed")
+	func() {
+		defer func() { recover() }()
+		LimitAccess("example.org/decl.Func")
+		t.Error("should have panicked when trying to restrict a package that already allows some things")
+	}()
 	t.Cleanup(func() {
-		ControlledAccess = nil
+		LimitAccess("")
 	})
+
 	analysistest.Run(t, testdata, Analyzer, "example.org/...")
 }
