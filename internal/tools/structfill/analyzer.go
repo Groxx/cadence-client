@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	// Magic comment strings
+	// magic comment strings
 	mustFillComment = "lint:must-fill"
 	canSkipComment  = "lint:can-skip"
 )
@@ -41,30 +41,30 @@ func run(pass *analysis.Pass) (interface{}, error) {
 }
 
 func markStructs(pass *analysis.Pass) {
-	// Get the inspector from the inspect analyzer
+	// get the inspector from the inspect analyzer
 	inspect := pass.ResultOf[inspect.Analyzer].(*inspector.Inspector)
 
-	// Only look at GenDecl nodes for efficiency
+	// only look at GenDecl nodes for efficiency
 	nodeFilter := []ast.Node{(*ast.GenDecl)(nil)}
 
 	inspect.Preorder(nodeFilter, func(node ast.Node) {
 		n := node.(*ast.GenDecl)
 
-		// Check if this is a type declaration
+		// check if this is a type declaration
 		if n.Tok != token.TYPE {
 			return
 		}
 
-		// Check each type spec in the declaration
+		// check each type spec in the declaration
 		for _, spec := range n.Specs {
 			if typeSpec, ok := spec.(*ast.TypeSpec); ok {
 				if structType, ok := typeSpec.Type.(*ast.StructType); ok {
-					// Found a struct declaration, check for the magic comment
+					// found a struct declaration, check for the magic comment
 					if hasCommentWithText(n.Doc, mustFillComment) {
-						// Get the type object for this struct
+						// get the type object for this struct
 						obj := pass.TypesInfo.Defs[typeSpec.Name]
 						if obj != nil {
-							// Find which fields can be skipped, and export the fact
+							// find which fields can be skipped, and export the fact
 							skippableFields := parseSkippableFields(structType)
 							pass.ExportObjectFact(obj, &MustFillFact{
 								SkippableFields: skippableFields,
@@ -80,18 +80,18 @@ func markStructs(pass *analysis.Pass) {
 func enforceRules(pass *analysis.Pass) {
 	inspect := pass.ResultOf[inspect.Analyzer].(*inspector.Inspector)
 
-	// Only look at CompositeLit nodes for efficiency
+	// only look at CompositeLit nodes for efficiency
 	nodeFilter := []ast.Node{(*ast.CompositeLit)(nil)}
 
 	inspect.Preorder(nodeFilter, func(node ast.Node) {
 		n := node.(*ast.CompositeLit)
-		// Found a struct literal, check if it needs complete filling
+		// found a struct literal, check if it needs complete filling
 		checkStructLiteral(pass, n)
 	})
 }
 
 // hasCommentWithText checks if the comment group contains a line that starts with the target string
-// The target must be at the beginning of the line, optionally followed by a space and additional text
+// the target must be at the beginning of the line, optionally followed by a space and additional text
 func hasCommentWithText(commentGroup *ast.CommentGroup, target string) bool {
 	if commentGroup == nil {
 		return false
@@ -118,7 +118,7 @@ func parseSkippableFields(structType *ast.StructType) []string {
 
 	for _, field := range structType.Fields.List {
 		if hasCommentWithText(field.Doc, canSkipComment) || hasCommentWithText(field.Comment, canSkipComment) {
-			// Add all names in this field as skippable
+			// add all names in this field as skippable
 			for _, name := range field.Names {
 				skippable = append(skippable, name.Name)
 			}
@@ -130,7 +130,7 @@ func parseSkippableFields(structType *ast.StructType) []string {
 
 // checkStructLiteral verifies that struct literals for MustFill types have all fields explicitly filled
 func checkStructLiteral(pass *analysis.Pass, lit *ast.CompositeLit) {
-	// Get the type of this composite literal
+	// get the type of this composite literal
 	tv, ok := pass.TypesInfo.Types[lit]
 	if !ok {
 		return
@@ -176,7 +176,7 @@ func checkStructLiteral(pass *analysis.Pass, lit *ast.CompositeLit) {
 		}
 	}
 
-	// Check all struct fields are present (unless they can be skipped)
+	// check all struct fields are present (unless they can be skipped)
 	for i := 0; i < structType.NumFields(); i++ {
 		field := structType.Field(i)
 		if !field.Exported() {
